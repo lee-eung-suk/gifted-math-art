@@ -1,0 +1,10 @@
+{
+  "name": "gifted-math-art",
+  "private": true,
+  "type": "module",
+  "description": "초등 5·6학년 수학영재반 — 패턴블럭 · 생성형 AI · 테셀레이션 컵 만들기 수업 사이트",
+  "engines": { "node": ">=18" },
+  "dependencies": {
+    "@vercel/blob": "2.8.2"
+  }
+}

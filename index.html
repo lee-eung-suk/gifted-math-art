@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>도형이 예술이 되는 시간 · 수학영재반</title>
+<meta name="description" content="초등 5·6학년 수학영재반 — 패턴블럭으로 만들고, 생성형 AI로 바꾸고, 테셀레이션 컵으로 완성하기">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='25,7 75,7 100,50 75,93 25,93 0,50' fill='%23ffc23d'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <span class="eyebrow">초등 5·6학년 수학영재반</span>
+      <h1>도형이 <em>예술</em>이 되는 시간</h1>
+      <p class="lead">손으로 패턴블럭 작품을 만들고, 생성형 AI로 다른 스타일로 바꾸고, 빈틈없는 테셀레이션 무늬를 뽑아 <b>나만의 컵</b>에 전사해요. 수학자의 눈으로 검증하는 것까지가 우리 몫!</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <span class="pb hex a"></span><span class="pb tri b"></span><span class="pb rho c"></span><span class="pb trap d"></span><span class="pb sq e"></span>
+    </div>
+  </header>
+</div>
+
+<nav class="nav" aria-label="바로 가기"><div class="wrap">
+  <a href="#explore"><span class="pb tri"></span>① 탐구</a>
+  <a href="#blocks"><span class="pb hex"></span>② 패턴블럭</a>
+  <a href="#style"><span class="pb rho"></span>③ 스타일 바꾸기</a>
+  <a href="#tess"><span class="pb trap"></span>④ 테셀레이션</a>
+  <a href="#mug"><span class="pb sq"></span>⑤ 컵 전사</a>
+  <a href="#submit" class="go">작품 올리기 ↑</a>
+</div></nav>
+
+<main class="wrap">
+  <!-- 흐름 -->
+  <section id="flow" style="padding-top:32px">
+    <div class="flow">
+      <a class="step" href="#explore"><span class="pb tri"></span><small>1차시 · 40분</small><b>테셀레이션 탐구</b><small>한 꼭짓점의 각은 왜 360°?</small></a>
+      <a class="step" href="#blocks"><span class="pb hex"></span><small>2차시 · 40분</small><b>패턴블럭 작품</b><small>손 또는 웹으로 만들기</small></a>
+      <a class="step" href="#style"><span class="pb rho"></span><small>3차시 · 40분</small><b>다른 스타일로</b><small>형태+대상+스타일+부가설명</small></a>
+      <a class="step" href="#tess"><span class="pb trap"></span><small>4차시 · 40분</small><b>테셀레이션 뽑기</b><small>밀기 · 돌리기 · 뒤집기</small></a>
+      <a class="step" href="#mug"><span class="pb sq"></span><small>5차시 · 40분</small><b>컵에 전사하기</b><small>좌우반전 · 머그프레스</small></a>
+    </div>
+  </section>
+
+  <!-- ① 탐구 -->
+  <section id="explore" style="--acc:var(--tri);--acc-l:var(--tri-l)">
+    <div class="sec-head"><div class="sec-no">1</div><h2>테셀레이션, 왜 빈틈이 없을까?</h2><p>평면을 빈틈없이 · 겹치지 않게 · 규칙적으로 채우는 것</p></div>
+    <div class="goal"><span>■ 평면을 빈틈없이 채운다</span><span>■ 도형끼리 겹치지 않는다</span><span>■ 일정한 규칙이 반복된다</span></div>
+
+    <div class="box">
+      <h4>꼭짓점 실험실 — 한 점에 도형을 모아 보세요</h4>
+      <div class="vertex">
+        <div>
+          <svg id="vertexSvg" viewBox="-200 -200 400 400" role="img" aria-label="한 꼭짓점에 모인 정다각형"></svg>
+        </div>
+        <div class="stack">
+          <div class="row" id="vertexBtns" role="group" aria-label="정다각형 추가"></div>
+          <div><div class="small muted">한 꼭짓점에 모인 각의 합</div><div class="sum" id="vertexSum" aria-live="polite">0°</div><div class="small" id="vertexMsg">도형 버튼을 눌러 한 점에 붙여 보세요.</div></div>
+          <div class="seq" id="vertexSeq"></div>
+          <div class="row">
+            <button class="tbtn" type="button" id="vertexUndo">↶ 하나 빼기</button>
+            <button class="tbtn" type="button" id="vertexClear">모두 지우기</button>
+          </div>
+          <div class="small muted">도전 조합: <button class="chip" type="button" data-combo="3,3,3,3,3,3">3·3·3·3·3·3</button> <button class="chip" type="button" data-combo="3,6,3,6">3·6·3·6</button> <button class="chip" type="button" data-combo="4,8,8">4·8·8</button> <button class="chip" type="button" data-combo="3,12,12">3·12·12</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="box">
+        <h4>정다각형 한 내각 표 — 예상하고 눌러서 확인</h4>
+        <table class="angles" id="angleTable">
+          <thead><tr><th>정다각형</th><th>한 내각</th><th>360° ÷ 내각</th><th>혼자 채울까?</th></tr></thead>
+          <tbody></tbody>
+        </table>
+        <p class="small muted" style="margin-top:8px">한 내각 = 180° × (n − 2) ÷ n</p>
+      </div>
+      <div class="stack">
+        <div class="box tint">
+          <h4>에셔의 비밀 — 세 가지 움직임</h4>
+          <ul class="dots">
+            <li><b>밀기(평행이동)</b> — 그대로 옆으로 옮기기</li>
+            <li><b>돌리기(회전이동)</b> — 한 점을 중심으로 90° · 120° · 180° 돌리기</li>
+            <li><b>뒤집기(대칭이동)</b> — 거울처럼 뒤집기</li>
+          </ul>
+          <p class="small" style="margin-top:8px">에셔의 도마뱀은 정육각형의 변을 잘라 붙여서(한 변을 깎으면 맞은편에 붙이기) 만들어졌어요.</p>
+        </div>
+        <div class="box">
+          <h4>체험해 보기 (EBS MATH)</h4>
+          <div class="row">
+            <a class="btn ghost" target="_blank" rel="noopener" href="https://www.ebsmath.co.kr/innovativelrms/web_lrms/content/resource/PC/28334/index.html?check=false&RSC_SNO=28334&HIDE_RANK=N&HISTORY_TYPE=study">테셀레이션 초급 ↗</a>
+            <a class="btn ghost" target="_blank" rel="noopener" href="https://www.ebsmath.co.kr/innovativelrms/web_lrms/content/resource/PC/28345/index.html?check=false&RSC_SNO=28345&HIDE_RANK=N&HISTORY_TYPE=study">테셀레이션 중급 ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="challenge" style="margin-top:16px">
+      <h4>🧠 영재 도전</h4>
+      <ol>
+        <li>정다각형 <b>한 가지</b>만으로 테셀레이션이 되는 것은 몇 가지일까? 왜 그것뿐일까? 내각의 식으로 설명해 보세요.</li>
+        <li>정오각형은 왜 안 될까? 정오각형 3개를 모으면 몇 도가 남을까?</li>
+        <li>두 가지 이상 정다각형으로 한 점을 360°로 채우는 조합을 찾아보세요. (힌트: 3·3·4·3·4)</li>
+        <li>정다각형이 아닌 <b>아무 삼각형</b>, <b>아무 사각형</b>은 테셀레이션이 될까? 종이로 잘라 확인해 보세요.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ② 패턴블럭 -->
+  <section id="blocks" style="--acc:#e8a400;--acc-l:var(--hex-l)">
+    <div class="sec-head"><div class="sec-no">2</div><h2>패턴블럭으로 작품 만들기</h2><p>실물 블록으로 만들거나, 아래 웹 블록판에서 만들어요</p></div>
+
+    <div class="tool">
+      <div class="toolbar" id="blockBar" role="toolbar" aria-label="패턴블럭 도구">
+        <button class="tbtn" type="button" data-add="hex"><span class="pb hex"></span>육각형</button>
+        <button class="tbtn" type="button" data-add="trap"><span class="pb trap"></span>사다리꼴</button>
+        <button class="tbtn" type="button" data-add="rho"><span class="pb rho"></span>마름모</button>
+        <button class="tbtn" type="button" data-add="tri"><span class="pb tri"></span>삼각형</button>
+        <button class="tbtn" type="button" data-add="sq"><span class="pb sq"></span>정사각형</button>
+        <button class="tbtn" type="button" data-add="tan"><span class="pb tan"></span>얇은 마름모</button>
+        <span class="sep"></span>
+        <button class="tbtn" type="button" data-act="rotL" title="왼쪽으로 30° (Q)">↺ 30°</button>
+        <button class="tbtn" type="button" data-act="rotR" title="오른쪽으로 30° (E)">↻ 30°</button>
+        <button class="tbtn" type="button" data-act="flip" title="뒤집기 (F)">⇋ 뒤집기</button>
+        <button class="tbtn" type="button" data-act="dup" title="복제 (D)">⧉ 복제</button>
+        <button class="tbtn" type="button" data-act="color">🎨 색</button>
+        <button class="tbtn" type="button" data-act="del" title="삭제 (Delete)">🗑 삭제</button>
+        <span class="sep"></span>
+        <button class="tbtn" type="button" data-act="snap" aria-pressed="true">🧲 자석</button>
+        <button class="tbtn" type="button" data-act="undo">↶ 되돌리기</button>
+        <button class="tbtn" type="button" data-act="clear">모두 지우기</button>
+      </div>
+      <div class="canvas-wrap">
+        <svg id="blockSvg" viewBox="0 0 900 600" role="application" aria-label="패턴블럭 작업판"></svg>
+        <div class="hint" id="blockHint">위 버튼으로 블록을 꺼내 끌어 옮기세요 · 두 번 누르면 회전 · 꼭짓점끼리 자석처럼 붙어요</div>
+      </div>
+      <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:0">
+        <span class="small muted" id="blockCount">블록 0개</span>
+        <span style="flex:1"></span>
+        <button class="btn ghost" type="button" id="blockPng">PNG로 저장</button>
+        <button class="btn acc" type="button" id="blockSend">이 작품 올리기 ↓</button>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="box">
+        <h4>이렇게 해요</h4>
+        <ol class="steps">
+          <li><span>주제 정하기 — 좋아하는 동물, 상상 속 생물, 로봇, 우주선…</span></li>
+          <li><span>어떤 블록으로 어디를 표현할지 구상하기</span></li>
+          <li><span>실물 블록이면 <b>위에서 반듯하게</b> 사진 찍기 (그림자 · 손 · 얼굴 X)</span></li>
+          <li><span>작품 설명 쓰기 → 사진과 함께 올리기</span></li>
+        </ol>
+      </div>
+      <div class="box tint">
+        <h4>작품 설명 예시</h4>
+        <p>“저는 <b>정육각형과 정삼각형</b>을 이용해 <b>헤엄치는 물고기</b>를 만들었습니다. 파란색과 초록색 블록을 사용하여 시원한 바다 느낌을 표현했습니다.”</p>
+        <p class="small" style="margin-top:10px"><b>영재반 한 줄 더:</b> 사용한 블록 수와 넓이를 삼각형(초록) 단위로 계산해 보세요. 육각형=6, 사다리꼴=3, 마름모=2, 삼각형=1.</p>
+        <p class="small" style="margin-top:6px">내 작품 넓이: <b id="blockArea">0</b> 삼각형 · 대칭축이 있나요?</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ③ 스타일 -->
+  <section id="style" style="--acc:var(--rho);--acc-l:var(--rho-l)">
+    <div class="sec-head"><div class="sec-no">3</div><h2>내 작품을 다른 스타일로</h2><p>프롬프트 공식: 형태 + 대상 + 스타일 + 부가 설명</p></div>
+
+    <div class="grid-3-2">
+      <div class="box">
+        <h4>프롬프트 조립기</h4>
+        <div class="builder" id="styleBuilder">
+          <div class="field"><span>① 형태 — 무엇으로 만들었나요?</span>
+            <div class="chips" data-key="form" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-v="첨부한 사진은 내가 패턴블럭으로 만든">패턴블럭 사진</button>
+              <button class="chip" type="button" data-v="첨부한 그림은 정육각형, 정삼각형, 마름모 같은 도형으로 만든">도형 그림</button>
+              <button class="chip" type="button" data-v="첨부한 사진은 색종이 도형을 붙여 만든">색종이 작품</button>
+            </div></div>
+          <div class="field"><label for="sTarget">② 대상 — 무엇을 만들었나요?</label><input id="sTarget" value="토끼" maxlength="30"></div>
+          <div class="field"><span>③ 스타일 — 1~2개 고르기</span>
+            <div class="chips" data-key="style" id="styleChips"></div>
+            <p class="small muted" id="styleDesc"></p></div>
+          <div class="field"><label for="sExtra">④ 부가 설명 — 배경, 분위기, 지킬 것</label><input id="sExtra" value="숲속 배경, 따뜻한 분위기" maxlength="80"></div>
+          <label class="row small" style="font-weight:700"><input type="checkbox" id="sKeep" checked style="width:auto"> 도형의 모양 · 개수 · 배치는 그대로 지키기 (수학 지키기)</label>
+          <div class="out" id="styleOut" aria-live="polite"></div>
+          <div class="row"><button class="copy" type="button" id="styleCopy">복사</button><button class="btn ghost" type="button" data-fill="styleOut" data-act-id="style">올리기 칸에 넣기 ↓</button></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="box tint">
+          <h4>예시 — 패턴블럭 토끼 → 지브리 스타일</h4>
+          <div class="ba"><figure style="margin:0"><img src="img/ex-block-rabbit.jpg" alt="보라색 패턴블럭으로 만든 토끼" loading="lazy"></figure><span class="arrow">→</span><figure style="margin:0"><img src="img/ex-ai-rabbit.jpg" alt="같은 토끼를 숲속 그림 스타일로 바꾼 이미지" loading="lazy"></figure></div>
+        </div>
+        <div class="challenge">
+          <h4>🧠 수학자의 눈으로 검증</h4>
+          <ol>
+            <li>AI 그림에서 블록의 <b>개수</b>가 그대로인가요? 몇 개가 바뀌었나요?</li>
+            <li>정육각형이 정육각형으로 남았나요? 각이 달라진 곳은?</li>
+            <li>바뀐 곳을 찾아 “○○는 그대로 두고 다시 그려 줘”로 고쳐 보세요.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:16px">
+      <h4>바로 쓰는 프롬프트</h4>
+      <div class="prompts" id="stylePrompts"></div>
+    </div>
+    <p class="small muted" style="margin-top:10px">※ 생성형 AI는 선생님 계정으로 함께 사용해요. 학생은 사진과 프롬프트를 아래 ‘작품 올리기’로 보내면 됩니다. 친구 얼굴 · 실명 · 유명 캐릭터 이름은 넣지 않기.</p>
+  </section>
+
+  <!-- ④ 테셀레이션 -->
+  <section id="tess" style="--acc:var(--trap);--acc-l:var(--trap-l)">
+    <div class="sec-head"><div class="sec-no">4</div><h2>테셀레이션 무늬 뽑아내기</h2><p>기본 도형 + 주제 + 움직임 + 스타일 + 용도</p></div>
+
+    <div class="examples" style="margin-bottom:16px">
+      <figure><img src="img/ex-tess-bear.jpg" alt="곰 모양이 빈틈없이 반복되는 테셀레이션" loading="lazy"><figcaption>곰 — 밀기</figcaption></figure>
+      <figure><img src="img/ex-tess-cat.jpg" alt="고양이 퍼즐 모양 테셀레이션" loading="lazy"><figcaption>고양이 — 돌리기 각도 표시</figcaption></figure>
+      <figure><img src="img/ex-tess-swan.jpg" alt="백조가 맞물린 에셔 풍 테셀레이션" loading="lazy"><figcaption>백조 — 에셔 풍</figcaption></figure>
+    </div>
+
+    <div class="grid-3-2">
+      <div class="box">
+        <h4>테셀레이션 프롬프트 조립기</h4>
+        <div class="builder" id="tessBuilder">
+          <div class="field"><span>기본 도형</span>
+            <div class="chips" data-key="shape" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-v="정육각형">정육각형</button>
+              <button class="chip" type="button" data-v="정삼각형">정삼각형</button>
+              <button class="chip" type="button" data-v="정사각형">정사각형</button>
+              <button class="chip" type="button" data-v="평행사변형">평행사변형</button>
+              <button class="chip" type="button" data-v="정육각형과 정삼각형(3·6·3·6 배열)">3·6·3·6</button>
+              <button class="chip" type="button" data-v="정팔각형과 정사각형(4·8·8 배열)">4·8·8</button>
+            </div></div>
+          <div class="field"><label for="tSubject">주제 — 반복될 모양</label><input id="tSubject" value="고양이" maxlength="30"></div>
+          <div class="field"><span>움직임</span>
+            <div class="chips" data-key="move" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-v="밀기(평행이동)">밀기</button>
+              <button class="chip" type="button" data-v="돌리기(회전이동)">돌리기</button>
+              <button class="chip" type="button" data-v="뒤집기(대칭이동)">뒤집기</button>
+              <button class="chip" type="button" data-v="밀기와 돌리기를 함께">밀기+돌리기</button>
+            </div></div>
+          <div class="field"><label for="tStyle">색 · 스타일</label><input id="tStyle" value="무지개 6가지 색, 귀여운 카툰" maxlength="60"></div>
+          <div class="field"><span>용도</span>
+            <div class="chips" data-key="use" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-v="mug">컵 전사용 (가로로 긴 2:1)</button>
+              <button class="chip" type="button" data-v="square">정사각형 작품</button>
+            </div></div>
+          <div class="out" id="tessOut" aria-live="polite"></div>
+          <div class="row"><button class="copy" type="button" id="tessCopy">복사</button><button class="btn ghost" type="button" data-fill="tessOut" data-act-id="tess">올리기 칸에 넣기 ↓</button></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="challenge">
+          <h4>🧠 뽑은 뒤 검증 체크리스트</h4>
+          <ol>
+            <li>정말 <b>빈틈 · 겹침</b>이 없나요? 확대해서 찾아보기</li>
+            <li>한 꼭짓점에 모인 각의 합은 360°?</li>
+            <li>어떤 움직임(밀기 · 돌리기 · 뒤집기)이 쓰였나요? 몇 도 돌렸나요?</li>
+            <li>컵에 감았을 때 <b>왼쪽 끝과 오른쪽 끝</b>이 이어지나요?</li>
+          </ol>
+        </div>
+        <div class="box tint">
+          <h4>AI가 틀렸다면?</h4>
+          <p class="small">“빈틈이 보여” “고양이 크기가 다 달라”처럼 <b>무엇이 틀렸는지 수학 용어로</b> 말해 주면 더 잘 고쳐요. 아래 ‘고쳐 달라고 하기’ 프롬프트를 써 보세요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="box" style="margin-top:16px">
+      <h4>바로 쓰는 프롬프트</h4>
+      <div class="prompts" id="tessPrompts"></div>
+    </div>
+
+    <div class="box" style="margin-top:16px">
+      <h4>내 그림으로 직접 테셀레이션 만들기 — 한 조각을 밀고 · 돌리고 · 뒤집어 보세요</h4>
+      <div class="grid2">
+        <div class="stack">
+          <div class="drop" id="tileDrop">
+            <span>조각 이미지 올리기 (사진 · 그림 · AI 결과)</span>
+            <input type="file" id="tileFile" accept="image/*" aria-label="테셀레이션 조각 이미지">
+            <button class="btn ghost" type="button" id="tileFromBlocks">② 패턴블럭 작품 불러오기</button>
+          </div>
+          <div class="field"><span>움직임</span>
+            <div class="chips" id="tileModes">
+              <button class="chip" type="button" aria-pressed="true" data-m="slide">밀기</button>
+              <button class="chip" type="button" data-m="brick">벽돌 밀기</button>
+              <button class="chip" type="button" data-m="half">반 바퀴 돌리기</button>
+              <button class="chip" type="button" data-m="rot4">90° 돌리기</button>
+              <button class="chip" type="button" data-m="mirror">뒤집기</button>
+            </div></div>
+          <div class="field"><label for="tileSize">조각 크기 <span id="tileSizeV" class="muted"></span></label><input type="range" id="tileSize" min="60" max="400" value="160"></div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="tilePng">PNG 저장</button>
+            <button class="btn ghost" type="button" id="tileToMug">⑤ 컵 전사로 보내기</button>
+            <button class="btn acc" type="button" id="tileSend">올리기 ↓</button>
+          </div>
+        </div>
+        <canvas id="tileCanvas" class="preview" width="1200" height="600" aria-label="테셀레이션 미리보기"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 컵 -->
+  <section id="mug" style="--acc:#e9821e;--acc-l:var(--sq-l)">
+    <div class="sec-head"><div class="sec-no">5</div><h2>나만의 테셀레이션 컵</h2><p>디지털 작품이 진짜 물건이 되는 순간</p></div>
+
+    <div class="grid2">
+      <div class="stack">
+        <div class="drop" id="mugDrop">
+          <span>컵에 넣을 이미지 올리기</span>
+          <input type="file" id="mugFile" accept="image/*" aria-label="컵에 넣을 이미지">
+        </div>
+        <div class="field"><span>배치</span>
+          <div class="chips" id="mugFit">
+            <button class="chip" type="button" aria-pressed="true" data-f="repeat">반복해서 둘러싸기</button>
+            <button class="chip" type="button" data-f="cover">한 장으로 꽉 채우기</button>
+            <button class="chip" type="button" data-f="twice">양쪽에 한 장씩</button>
+          </div></div>
+        <div class="field"><label for="mugScale">무늬 크기</label><input type="range" id="mugScale" min="40" max="200" value="100"></div>
+        <div class="field"><label for="mugSpin">컵 돌려 보기</label><input type="range" id="mugSpin" min="0" max="360" value="0"></div>
+        <div class="row">
+          <button class="btn acc" type="button" id="mugPrint">전사용 PNG (좌우반전)</button>
+          <button class="btn ghost" type="button" id="mugPlain">원본 방향 PNG</button>
+          <button class="btn ghost" type="button" id="mugSend">올리기 ↓</button>
+        </div>
+        <p class="small muted">인쇄 크기: 가로 21cm × 세로 8.8cm (11온스 머그 기준, 300dpi). 인쇄할 때 ‘실제 크기(100%)’로. 프린터에 ‘좌우반전’ 설정이 따로 있으면 두 번 뒤집히지 않게 ‘원본 방향’ 파일을 쓰세요.</p>
+      </div>
+      <div class="stack">
+        <canvas id="mugCanvas" class="preview" width="640" height="520" aria-label="머그컵 미리보기"></canvas>
+        <canvas id="mugSheet" class="preview" width="1240" height="520" aria-label="전사지 인쇄 미리보기 (좌우반전)"></canvas>
+        <p class="small muted" style="margin-top:-8px">↑ 전사지에 인쇄될 모습 (좌우반전)</p>
+      </div>
+    </div>
+
+    <div class="safety" style="margin-top:16px">
+      <div><b>수칙 1</b>선생님 허락 없이 전원을 켜거나 만지지 않아요.</div>
+      <div><b>수칙 2</b>작동 중엔 열판(<span class="hot">180~200℃</span>)에 손 · 몸을 가까이 대지 않아요.</div>
+      <div><b>수칙 3</b>완성된 컵은 매우 뜨거워요. 장갑을 끼고 지정된 곳에서 식혀요.</div>
+    </div>
+
+    <div class="grid2" style="margin-top:16px">
+      <div class="box">
+        <h4>전사 순서</h4>
+        <ol class="steps">
+          <li><span>도안을 전사 용지에 <b>좌우반전</b>으로 인쇄하기 (선생님이 한꺼번에 준비)</span></li>
+          <li><span>여백 없이 깔끔하게 오려 컵에 감고 내열 테이프로 고정</span></li>
+          <li><span>선생님과 1:1로 컵을 프레스에 넣고 레버 닫기</span></li>
+          <li><span>설정 시간(예: 180초) 뒤 알람 → 선생님이 꺼내기</span></li>
+          <li><span>냉각 장소에서 완전히 식힌 뒤, 전사 용지를 떼며 작품 확인!</span></li>
+        </ol>
+        <div class="row" style="margin-top:12px">
+          <a class="btn ghost" href="https://www.youtube.com/watch?v=vAt_K5alXVg" target="_blank" rel="noopener">머그프레스 사용법 영상 1 ↗</a>
+          <a class="btn ghost" href="https://www.youtube.com/watch?v=7dB3H3c7eDE" target="_blank" rel="noopener">영상 2 ↗</a>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="challenge">
+          <h4>🧠 컵 위의 수학</h4>
+          <ol>
+            <li>컵 둘레가 약 25cm인데 도안 가로는 21cm예요. 손잡이 쪽 4cm는 어떻게 될까요?</li>
+            <li>왜 좌우반전해서 인쇄할까요? 도장과 무엇이 닮았나요?</li>
+            <li>컵을 한 바퀴 돌리면 무늬가 몇 번 반복되나요? (무늬 크기를 바꿔 확인)</li>
+          </ol>
+        </div>
+        <div class="box tint">
+          <h4>메이커 성찰 일지</h4>
+          <p class="small">Q1. 디지털 세상에 있던 나의 디자인이 실제 컵이 되는 과정을 보며 어떤 생각이 들었나요?<br>Q2. 완성된 작품에서 가장 마음에 드는 부분과 그 이유는?<br>Q3. 내 컵에 숨어 있는 수학(도형 · 각 · 움직임)을 친구에게 설명해 보세요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 제출 -->
+  <section id="submit" style="--acc:var(--vio);--acc-l:var(--vio-l)">
+    <div class="sec-head"><div class="sec-no">↑</div><h2>작품 올리기</h2><p>올린 작품은 선생님만 볼 수 있어요</p></div>
+    <div class="grid2">
+      <form class="submit box" id="upForm" novalidate>
+        <div class="grid2" style="gap:10px">
+          <label class="field" for="uName"><span>이름(별명)</span><input id="uName" maxlength="20" placeholder="예: 6학년 수학왕" autocomplete="off"></label>
+          <label class="field" for="uGroup"><span>모둠 · 번호 (선택)</span><input id="uGroup" maxlength="20" placeholder="예: 2모둠 3번" autocomplete="off"></label>
+        </div>
+        <label class="field" for="uAct"><span>어떤 활동인가요?</span>
+          <select id="uAct">
+            <option value="block">② 패턴블럭 작품</option>
+            <option value="style">③ 스타일 바꾸기</option>
+            <option value="tess">④ 테셀레이션</option>
+            <option value="mug">⑤ 컵 전사 도안</option>
+            <option value="etc">기타</option>
+          </select></label>
+        <div class="field"><span>이미지</span>
+          <div class="drop" id="upDrop">
+            <img id="upThumb" class="thumb" alt="올릴 이미지 미리보기" hidden>
+            <span id="upDropText">사진을 고르거나 여기에 끌어다 놓기</span>
+            <input type="file" id="uFile" accept="image/*" aria-label="올릴 이미지">
+          </div></div>
+        <label class="field" for="uDesc"><span>작품 설명</span><textarea id="uDesc" maxlength="600" placeholder="저는 정육각형과 정삼각형을 이용해 …를 만들었습니다."></textarea></label>
+        <label class="field" for="uPrompt"><span>AI에게 보낼 프롬프트 (선택)</span><textarea id="uPrompt" maxlength="1500" placeholder="위 조립기에서 ‘올리기 칸에 넣기’를 누르면 자동으로 들어와요"></textarea></label>
+        <label class="field" for="uCode" id="uCodeWrap" hidden><span>수업 코드</span><input id="uCode" maxlength="40" autocomplete="off" placeholder="선생님이 알려 준 코드"></label>
+        <button class="btn acc" type="submit" id="uBtn" style="justify-content:center;padding:12px">선생님께 보내기</button>
+        <p class="status" id="uStatus" role="status"></p>
+      </form>
+      <div class="stack">
+        <div class="box tint">
+          <h4>올리기 전에 확인</h4>
+          <ul class="dots">
+            <li>얼굴 · 이름표 · 손이 사진에 나오지 않나요?</li>
+            <li>작품이 <b>위에서 반듯하게</b> 찍혔나요?</li>
+            <li>작품 설명에 <b>사용한 도형</b>이 들어갔나요?</li>
+            <li>프롬프트에 친구 실명이나 유명 캐릭터 이름이 없나요?</li>
+          </ul>
+        </div>
+        <div class="box">
+          <h4>디지털 시민 약속</h4>
+          <p class="small">AI가 만든 그림도 출처를 밝혀요(“AI와 함께 만듦”). 다른 사람의 그림 · 사진은 허락 없이 올리지 않아요. AI 결과는 정답이 아니라 <b>재료</b> — 수학적으로 맞는지는 우리가 판단해요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <footer>초등 5·6학년 수학영재반 · 경북 소천초등학교 이응석 · <a href="teacher.html">교사용</a></footer>
+</main>
+
+<script src="assets/app.js"></script>
+</body>
+</html>

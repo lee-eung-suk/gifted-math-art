@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>교사용 작품함 · 수학영재반</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="assets/style.css">
+<style>
+.login{max-width:380px;margin:80px auto;display:grid;gap:12px}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-block:16px}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:grid;grid-template-rows:auto 1fr}
+.card .img{aspect-ratio:4/3;background:var(--bg);display:grid;place-items:center}
+.card .img img{max-height:100%;max-width:100%;object-fit:contain;cursor:zoom-in}
+.card .body{padding:12px 14px;display:grid;gap:6px;align-content:start}
+.card .who{font-weight:700}
+.lab{font-size:12px;font-weight:700;padding:2px 10px;border-radius:999px;background:var(--bg);justify-self:start}
+.card pre{margin:0;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--body);font-size:14px;background:var(--code);border-radius:10px;padding:8px 10px}
+.card .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.sel{width:18px;height:18px}
+dialog{border:0;border-radius:16px;padding:0;max-width:94vw;max-height:94vh;background:var(--bg)}
+dialog img{max-width:94vw;max-height:88vh}
+dialog::backdrop{background:rgba(0,0,0,.6)}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <form class="login box" id="login">
+    <h2>교사용 작품함</h2>
+    <p class="muted small">Vercel 환경변수 TEACHER_PASSWORD 에 정한 비밀번호</p>
+    <input type="password" id="pw" autocomplete="current-password" placeholder="비밀번호" aria-label="비밀번호">
+    <button class="btn" type="submit">열기</button>
+    <p class="status err" id="loginMsg" role="status"></p>
+  </form>
+
+  <div id="app" hidden>
+    <header class="bar" style="margin-top:28px">
+      <h2 style="margin-right:auto">학생 작품함 <span class="muted" id="count"></span></h2>
+      <button class="btn ghost" type="button" id="refresh">새로고침</button>
+      <button class="btn" type="button" id="zipAll">보이는 작품 ZIP 다운로드</button>
+    </header>
+    <div class="bar">
+      <div class="chips" id="filters"></div>
+      <span style="flex:1"></span>
+      <a class="btn ghost" href="./">← 수업 페이지</a>
+    </div>
+    <p class="status" id="msg" role="status"></p>
+    <div class="cards" id="cards"></div>
+  </div>
+</main>
+<dialog id="viewer"><img id="viewerImg" alt=""></dialog>
+
+<script src="assets/jszip.min.js"></script>
+<script>
+(() => {
+const $ = s => document.querySelector(s);
+const ACT = { block: "② 패턴블럭 작품", style: "③ 스타일 바꾸기", tess: "④ 테셀레이션", mug: "⑤ 컵 전사 도안", etc: "기타" };
+const ACT_COL = { block: "var(--hex-l)", style: "var(--rho-l)", tess: "var(--trap-l)", mug: "var(--sq-l)", etc: "var(--vio-l)" };
+let key = "", items = [], filter = "all";
+const blobs = new Map(); // 경로 → objectURL
+
+try { key = sessionStorage.getItem("tkey") || ""; } catch {}
+const api = (path, opt = {}) => fetch(path, { ...opt, headers: { ...(opt.headers || {}), "x-teacher-key": key } });
+
+async function load() {
+  $("#msg").textContent = "불러오는 중…";
+  const r = await api("api/list");
+  if (r.status === 401) { key = ""; try { sessionStorage.removeItem("tkey"); } catch {} $("#app").hidden = true; $("#login").hidden = false; $("#loginMsg").textContent = "비밀번호가 맞지 않아요."; return false; }
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) { $("#msg").textContent = j.error || "목록을 불러오지 못했어요."; return true; }
+  items = j.items || []; $("#msg").textContent = ""; render(); return true;
+}
+async function imageURL(it) {
+  if (blobs.has(it.imagePath)) return blobs.get(it.imagePath);
+  const r = await api(`api/file?p=${encodeURIComponent(it.imagePath)}&a=${it.access || "private"}`);
+  if (!r.ok) throw new Error("이미지 오류");
+  const u = URL.createObjectURL(await r.blob()); blobs.set(it.imagePath, u); return u;
+}
+const pad = n => String(n).padStart(2, "0");
+const stamp = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+const safe = s => String(s || "").replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 30);
+const fileName = (it, i) => `${safe(ACT[it.activity] || "기타")}_${safe(it.group ? it.group + "_" + it.name : it.name)}_${new Date(it.createdAt).toISOString().slice(0, 16).replace(/[-:T]/g, "")}${i != null ? "_" + i : ""}.${it.ext || "jpg"}`;
+const visible = () => filter === "all" ? items : items.filter(x => x.activity === filter);
+
+function render() {
+  const f = $("#filters"); f.textContent = "";
+  [["all", "전체"], ...Object.entries(ACT)].forEach(([id, n]) => {
+    const c = id === "all" ? items.length : items.filter(x => x.activity === id).length;
+    if (id !== "all" && !c) return;
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", id === filter); b.textContent = `${n} ${c}`;
+    b.onclick = () => { filter = id; render(); }; f.append(b);
+  });
+  const list = visible();
+  $("#count").textContent = `${list.length}개`;
+  const box = $("#cards"); box.textContent = "";
+  if (!list.length) { box.innerHTML = '<div class="drop" style="grid-column:1/-1;padding:40px">아직 올라온 작품이 없어요.</div>'; return; }
+  list.forEach(it => {
+    const card = document.createElement("article"); card.className = "card";
+    const imgBox = document.createElement("div"); imgBox.className = "img";
+    const img = document.createElement("img"); img.alt = `${it.name}의 작품`; imgBox.append(img);
+    imageURL(it).then(u => { img.src = u; img.onclick = () => { $("#viewerImg").src = u; $("#viewer").showModal(); }; }).catch(() => { imgBox.textContent = "이미지를 열지 못했어요"; });
+    const body = document.createElement("div"); body.className = "body";
+    const lab = document.createElement("span"); lab.className = "lab"; lab.style.background = ACT_COL[it.activity] || ""; lab.textContent = ACT[it.activity] || "기타";
+    const who = document.createElement("div"); who.className = "who"; who.textContent = `${it.name}${it.group ? " · " + it.group : ""}`;
+    const time = document.createElement("small"); time.className = "muted"; time.textContent = stamp(it.createdAt);
+    body.append(lab, who, time);
+    if (it.desc) { const p = document.createElement("p"); p.className = "small"; p.textContent = it.desc; body.append(p); }
+    if (it.prompt) { const pre = document.createElement("pre"); pre.textContent = it.prompt; body.append(pre); }
+    const acts = document.createElement("div"); acts.className = "acts";
+    const dl = btn("다운로드", async () => { download(await imageURL(it), fileName(it)); });
+    acts.append(dl);
+    if (it.prompt) acts.append(btn("프롬프트 복사", e => copy(it.prompt, e.currentTarget)));
+    const del = btn("삭제", async e => {
+      const b = e.currentTarget;
+      if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "한 번 더 누르면 삭제"; setTimeout(() => { b.dataset.armed = ""; b.textContent = "삭제"; }, 2500); return; }
+      b.disabled = true;
+      const r = await api("api/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ imagePath: it.imagePath, metaPath: it.metaPath }) });
+      if (r.ok) { items = items.filter(x => x !== it); render(); } else { b.disabled = false; b.textContent = "삭제 실패"; }
+    });
+    del.classList.add("ghost");
+    acts.append(del);
+    body.append(acts);
+    card.append(imgBox, body); box.append(card);
+  });
+}
+function btn(t, fn) { const b = document.createElement("button"); b.type = "button"; b.className = "btn ghost"; b.style.padding = "6px 12px"; b.style.fontSize = "14px"; b.textContent = t; b.onclick = fn; return b; }
+function download(url, name) { const a = document.createElement("a"); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove(); }
+function copy(t, b) { const done = () => { const o = b.textContent; b.textContent = "복사됨!"; setTimeout(() => b.textContent = o, 1400); }; navigator.clipboard.writeText(t).then(done, () => {}); }
+
+$("#login").addEventListener("submit", async e => {
+  e.preventDefault(); key = $("#pw").value; $("#loginMsg").textContent = "";
+  $("#login").hidden = true; $("#app").hidden = false;
+  if (await load()) { try { sessionStorage.setItem("tkey", key); } catch {} }
+});
+$("#refresh").onclick = load;
+$("#zipAll").onclick = async () => {
+  const list = visible(); if (!list.length) return;
+  const b = $("#zipAll"); b.disabled = true;
+  try {
+    const zip = new JSZip(); const used = new Set(); let csv = "﻿활동,이름,모둠,시간,파일,작품설명,프롬프트\n";
+    for (let i = 0; i < list.length; i++) {
+      const it = list[i]; b.textContent = `묶는 중 ${i + 1}/${list.length}`;
+      let n = fileName(it); if (used.has(n)) n = fileName(it, i); used.add(n);
+      const blob = await (await fetch(await imageURL(it))).blob();
+      zip.file(`${safe(ACT[it.activity] || "기타")}/${n}`, blob);
+      const q = s => `"${String(s || "").replace(/"/g, '""')}"`;
+      csv += [ACT[it.activity], it.name, it.group, new Date(it.createdAt).toLocaleString("ko-KR"), n, it.desc, it.prompt].map(q).join(",") + "\n";
+    }
+    zip.file("작품목록.csv", csv);
+    const out = await zip.generateAsync({ type: "blob" });
+    const d = new Date(); download(URL.createObjectURL(out), `수학영재반_작품_${d.getMonth() + 1}월${d.getDate()}일.zip`);
+  } catch { $("#msg").textContent = "ZIP을 만들지 못했어요."; }
+  b.disabled = false; b.textContent = "보이는 작품 ZIP 다운로드";
+};
+$("#viewer").addEventListener("click", () => $("#viewer").close());
+if (key) { $("#login").hidden = true; $("#app").hidden = false; load(); }
+})();
+</script>
+</body>
+</html>
