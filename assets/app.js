@@ -370,7 +370,7 @@ function initTessBuilder() {
   const box = $("#tessPrompts"); TESS_PROMPTS.forEach(([l, t]) => box.append(promptCard(l, t)));
   $$("[data-fill]").forEach(b => b.addEventListener("click", () => {
     $("#uPrompt").value = $("#" + b.dataset.fill).textContent; $("#uAct").value = b.dataset.actId;
-    $("#submit").scrollIntoView({ behavior: "smooth" });
+    go("submit");
   }));
 }
 
@@ -444,7 +444,7 @@ function initTile() {
   }));
   $("#tileSize").addEventListener("input", renderTile);
   $("#tilePng").addEventListener("click", () => download($("#tileCanvas").toDataURL("image/png"), "나의테셀레이션.png"));
-  $("#tileToMug").addEventListener("click", () => { loadImage($("#tileCanvas").toDataURL("image/png")).then(im => { mugImg = im; setFit("cover"); renderMug(); $("#mug").scrollIntoView({ behavior: "smooth" }); }); });
+  $("#tileToMug").addEventListener("click", () => { loadImage($("#tileCanvas").toDataURL("image/png")).then(im => { mugImg = im; setFit("cover"); renderMug(); go("mug"); }); });
   $("#tileSend").addEventListener("click", () => setUpload($("#tileCanvas").toDataURL("image/jpeg", .9), "tess", `직접 만든 테셀레이션 (움직임: ${$("#tileModes [aria-pressed=true]").textContent})\n`));
   renderTile();
 }
@@ -562,7 +562,7 @@ async function setUpload(src, act, descPrefix = "") {
   if (act) $("#uAct").value = act;
   if (descPrefix && !$("#uDesc").value.startsWith(descPrefix)) $("#uDesc").value = descPrefix + $("#uDesc").value;
   setStatus("");
-  $("#submit").scrollIntoView({ behavior: "smooth" });
+  go("submit");
 }
 function setStatus(t, kind) { const s = $("#uStatus"); s.textContent = t; s.className = "status" + (kind ? " " + kind : ""); }
 function initUpload() {
@@ -596,5 +596,27 @@ function initUpload() {
   });
 }
 
-initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initUpload();
+
+/* ---------- 화면 전환 (랜딩 ↔ 하위 페이지) ---------- */
+const PAGES = [["explore", "① 테셀레이션 탐구"], ["blocks", "② 패턴블럭 작품"], ["style", "③ 다른 스타일로"], ["tess", "④ 테셀레이션 뽑기"], ["mug", "⑤ 컵에 전사하기"], ["submit", "작품 올리기"]];
+function go(id) { if (location.hash === "#" + id) route(); else location.hash = id; }
+function route() {
+  const id = location.hash.slice(1);
+  const idx = PAGES.findIndex(p => p[0] === id);
+  document.body.classList.toggle("on-home", idx < 0);
+  $$(".pages > section").forEach(s => s.classList.toggle("active", s.id === id));
+  $$(".subnav a").forEach(a => { if (a.getAttribute("href") === "#" + id) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current"); });
+  const pg = $("#pager"); pg.textContent = "";
+  if (idx >= 0) {
+    const prev = idx > 0 ? PAGES[idx - 1] : ["home", "처음으로"], next = PAGES[idx + 1];
+    const a1 = document.createElement("a"); a1.href = "#" + prev[0]; a1.textContent = "← " + prev[1]; pg.append(a1);
+    if (next) { const a2 = document.createElement("a"); a2.className = "next"; a2.href = "#" + next[0]; a2.textContent = next[1] + " →"; pg.append(a2); }
+    document.title = PAGES[idx][1] + " · 응석쌤 수학영재수업";
+  } else document.title = "도형이 예술이 되는 시간 · 응석쌤 수학영재수업";
+  window.scrollTo(0, 0);
+  if (id === "mug") renderMug();
+}
+window.addEventListener("hashchange", route);
+
+initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initUpload(); route();
 })();

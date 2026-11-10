@@ -11,40 +11,41 @@
 <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-<div class="wrap">
+<!-- 랜딩: 스크롤 없이 한 화면 -->
+<div class="landing" id="home">
   <header class="hero">
     <div>
       <span class="eyebrow">응석쌤 수학영재수업</span>
       <h1>도형이 <em>예술</em>이 되는 시간</h1>
-      <p class="lead">손으로 패턴블럭 작품을 만들고, 생성형 AI로 다른 스타일로 바꾸고, 빈틈없는 테셀레이션 무늬를 뽑아 <b>나만의 컵</b>에 전사해요. 수학자의 눈으로 검증하는 것까지가 우리 몫!</p>
+      <p class="lead">패턴블럭으로 만들고, 생성형 AI로 바꾸고, 테셀레이션 무늬를 뽑아 <b>나만의 컵</b>에 전사해요. 수학자의 눈으로 검증하는 것까지가 우리 몫!</p>
     </div>
     <div class="hero-art" aria-hidden="true">
       <span class="pb hex a"></span><span class="pb tri b"></span><span class="pb rho c"></span><span class="pb trap d"></span><span class="pb sq e"></span>
     </div>
   </header>
+  <nav class="menu" aria-label="활동 고르기">
+    <a class="card-link" href="#explore" style="--acc:var(--tri);--acc-l:var(--tri-l)"><span class="pb tri"></span><small>1차시</small><b>테셀레이션 탐구</b><span class="d">한 꼭짓점의 각은 왜 360°?</span></a>
+    <a class="card-link" href="#blocks" style="--acc:var(--hex);--acc-l:var(--hex-l)"><span class="pb hex"></span><small>2차시</small><b>패턴블럭 작품</b><span class="d">손 또는 웹으로 만들기</span></a>
+    <a class="card-link" href="#style" style="--acc:var(--rho);--acc-l:var(--rho-l)"><span class="pb rho"></span><small>3차시</small><b>다른 스타일로</b><span class="d">형태+대상+스타일+부가설명</span></a>
+    <a class="card-link" href="#tess" style="--acc:var(--trap);--acc-l:var(--trap-l)"><span class="pb trap"></span><small>4차시</small><b>테셀레이션 뽑기</b><span class="d">밀기 · 돌리기 · 뒤집기</span></a>
+    <a class="card-link" href="#mug" style="--acc:var(--sq);--acc-l:var(--sq-l)"><span class="pb sq"></span><small>5차시</small><b>컵에 전사하기</b><span class="d">좌우반전 · 머그프레스</span></a>
+    <a class="card-link up" href="#submit" style="--acc:var(--vio);--acc-l:var(--vio-l)"><span class="pb hex" style="background:var(--vio)"></span><small>제출</small><b>작품 올리기</b><span class="d">선생님께 사진 · 프롬프트 보내기</span></a>
+  </nav>
+  <p class="land-foot">경북 소천초등학교 이응석 · <a href="teacher.html">교사용</a></p>
 </div>
 
-<nav class="nav" aria-label="바로 가기"><div class="wrap">
+<!-- 하위 페이지 상단 바 -->
+<nav class="nav subnav" aria-label="활동 이동"><div class="wrap">
+  <a href="#home" class="home">← 처음으로</a>
   <a href="#explore"><span class="pb tri"></span>① 탐구</a>
   <a href="#blocks"><span class="pb hex"></span>② 패턴블럭</a>
-  <a href="#style"><span class="pb rho"></span>③ 스타일 바꾸기</a>
+  <a href="#style"><span class="pb rho"></span>③ 스타일</a>
   <a href="#tess"><span class="pb trap"></span>④ 테셀레이션</a>
   <a href="#mug"><span class="pb sq"></span>⑤ 컵 전사</a>
-  <a href="#submit" class="go">작품 올리기 ↑</a>
+  <a href="#submit" class="go">작품 올리기</a>
 </div></nav>
 
-<main class="wrap">
-  <!-- 흐름 -->
-  <section id="flow" style="padding-top:32px">
-    <div class="flow">
-      <a class="step" href="#explore"><span class="pb tri"></span><small>1차시 · 40분</small><b>테셀레이션 탐구</b><small>한 꼭짓점의 각은 왜 360°?</small></a>
-      <a class="step" href="#blocks"><span class="pb hex"></span><small>2차시 · 40분</small><b>패턴블럭 작품</b><small>손 또는 웹으로 만들기</small></a>
-      <a class="step" href="#style"><span class="pb rho"></span><small>3차시 · 40분</small><b>다른 스타일로</b><small>형태+대상+스타일+부가설명</small></a>
-      <a class="step" href="#tess"><span class="pb trap"></span><small>4차시 · 40분</small><b>테셀레이션 뽑기</b><small>밀기 · 돌리기 · 뒤집기</small></a>
-      <a class="step" href="#mug"><span class="pb sq"></span><small>5차시 · 40분</small><b>컵에 전사하기</b><small>좌우반전 · 머그프레스</small></a>
-    </div>
-  </section>
-
+<main class="wrap pages">
   <!-- ① 탐구 -->
   <section id="explore" style="--acc:var(--tri);--acc-l:var(--tri-l)">
     <div class="sec-head"><div class="sec-no">1</div><h2>테셀레이션, 왜 빈틈이 없을까?</h2><p>평면을 빈틈없이 · 겹치지 않게 · 규칙적으로 채우는 것</p></div>
@@ -419,7 +420,7 @@
       </div>
     </div>
   </section>
-  <footer>응석쌤 수학영재수업 · 경북 소천초등학교 이응석 · <a href="teacher.html">교사용</a></footer>
+  <div class="pager" id="pager"></div>
 </main>
 
 <script src="assets/app.js"></script>
