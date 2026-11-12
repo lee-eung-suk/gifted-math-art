@@ -5,7 +5,8 @@ import { timingSafeEqual } from "node:crypto";
 export const ACTIVITIES = {
   block: "② 패턴블럭 작품",
   style: "③ 스타일 바꾸기",
-  tess: "④ 테셀레이션",
+  tess: "④ 테셀레이션 A (직접)",
+  tessai: "④ 테셀레이션 B (제미나이)",
   mug: "⑤ 컵 전사 도안",
   etc: "기타",
 };

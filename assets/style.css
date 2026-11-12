@@ -241,3 +241,46 @@ body:not(.on-home) .landing{display:none}
 }
 @media (max-height:640px){ .landing .hero .lead{display:none} }
 .examples{grid-template-columns:repeat(auto-fill,minmax(130px,190px))}
+
+/* ---------- 지금 할 일 · 저장 · 제출 ---------- */
+.todo{list-style:none;margin:0 0 16px;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;counter-reset:td}
+.todo li{position:relative;background:var(--acc-l,var(--surface));border-radius:14px;padding:10px 12px 10px 46px;font-size:14px;line-height:1.35;color:var(--fg)}
+.todo li::before{counter-increment:td;content:counter(td);position:absolute;left:12px;top:10px;width:26px;height:26px;border-radius:50%;background:var(--acc,var(--fg));color:var(--on-accent);display:grid;place-items:center;font-weight:700;font-size:14px}
+.todo li b{display:block;font-size:15px}
+.inline-field{display:inline-flex;align-items:center;gap:8px;font-weight:700;font-size:14px}
+.inline-field input{width:150px;min-height:38px}
+.savenote{margin:0;padding:8px 14px 12px;background:var(--surface)}
+.tabpanel > .savenote{background:none;padding:10px 2px 0}
+.savenote .warn,.warn{color:var(--trap);font-weight:700}
+.okc{color:var(--tri);font-weight:700}
+.sent{color:var(--tri);font-weight:700;white-space:nowrap}
+.sendbox{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;border:2px solid var(--acc,var(--fg));border-radius:var(--radius);padding:16px 20px;background:var(--bg)}
+.sendbox > div{flex:1 1 300px;min-width:0}
+.sendbox h4{margin:0 0 4px}
+.sendbox .btn{padding:12px 20px;font-size:16px}
+.mywork{display:flex;gap:16px;align-items:center;margin-bottom:16px;background:var(--acc-l);border-color:transparent}
+.mywork img{width:120px;height:90px;object-fit:contain;background:#fff;border-radius:10px;flex:none}
+.mywork small{display:block;color:var(--muted);font-weight:700}
+.mywork b{font-size:20px;margin-right:8px}
+.mywork p{margin:6px 0 0}
+.mywork .btn{margin-top:8px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.tab{border:2px solid var(--line);background:var(--bg);color:var(--fg);border-radius:16px;padding:12px 16px;text-align:left;font-size:16px;font-weight:700;cursor:pointer}
+.tab b{display:block;font-size:13px;color:var(--muted)}
+.tab[aria-selected="true"]{border-color:var(--acc);background:var(--acc-l)}
+.tab[aria-selected="true"] b{color:var(--acc)}
+.multi{margin:0;padding:10px 12px;border-radius:12px;background:var(--tri-l);font-size:14px;color:var(--fg)}
+.sentlist{margin:0;padding-left:18px;display:grid;gap:3px;font-size:14px;max-height:240px;overflow:auto}
+.send-dlg{border:0;border-radius:20px;padding:0;width:min(520px,calc(100vw - 32px));max-height:calc(100dvh - 32px);background:var(--surface);color:var(--fg);box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.send-dlg::backdrop{background:rgba(20,22,40,.5)}
+.send-dlg form{display:grid;gap:12px;padding:20px}
+.send-dlg #sdBody,.send-dlg #sdDone{display:grid;gap:12px}
+.send-dlg [hidden]{display:none !important}
+.sd-head{display:flex;align-items:center;justify-content:space-between}
+.sd-head h3{margin:0;font-family:var(--display);font-weight:400;font-size:24px}
+.sd-x{border:0;background:none;font-size:22px;color:var(--muted);cursor:pointer;padding:4px 8px}
+.sd-act{margin:0;font-weight:700;color:var(--vio)}
+.sd-ok{font-family:var(--display);font-size:26px;margin:8px 0 0;text-align:center}
+#sdDoneMsg{margin:0;text-align:center}
+.send-dlg .thumb{max-height:180px}
+@media (max-width:820px){ .tabs{grid-template-columns:1fr} .mywork{flex-direction:column;align-items:flex-start} .inline-field{flex-wrap:wrap} }

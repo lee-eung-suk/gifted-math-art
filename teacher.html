@@ -56,8 +56,8 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 <script>
 (() => {
 const $ = s => document.querySelector(s);
-const ACT = { block: "② 패턴블럭 작품", style: "③ 스타일 바꾸기", tess: "④ 테셀레이션", mug: "⑤ 컵 전사 도안", etc: "기타" };
-const ACT_COL = { block: "var(--hex-l)", style: "var(--rho-l)", tess: "var(--trap-l)", mug: "var(--sq-l)", etc: "var(--vio-l)" };
+const ACT = { block: "② 패턴블럭 작품", style: "③ 스타일 바꾸기", tess: "④ 테셀레이션 A (직접)", tessai: "④ 테셀레이션 B (제미나이)", mug: "⑤ 컵 전사 도안", etc: "기타" };
+const ACT_COL = { block: "var(--hex-l)", style: "var(--rho-l)", tess: "var(--trap-l)", tessai: "var(--trap-l)", mug: "var(--sq-l)", etc: "var(--vio-l)" };
 let key = "", items = [], filter = "all";
 const blobs = new Map(); // 경로 → objectURL
 

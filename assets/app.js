@@ -140,6 +140,7 @@ const SHAPES = {
   sq: { pts: [[0, 0], [S, 0], [S, -S], [0, -S]], col: "--sq", area: 4 / R3, name: "정사각형" },
   tan: { pts: [[0, 0], [S, 0], [S + S * c30, -S * s30], [S * c30, -S * s30]], col: "--tan", area: 2 / R3, name: "얇은 마름모" },
 };
+const PNAME = { hex: "정육각형", trap: "사다리꼴", rho: "마름모", tri: "정삼각형", sq: "정사각형", tan: "얇은 마름모" };
 for (const k in SHAPES) { // 무게중심을 원점으로
   const p = SHAPES[k].pts, cx = p.reduce((s, q) => s + q[0], 0) / p.length, cy = p.reduce((s, q) => s + q[1], 0) / p.length;
   SHAPES[k].pts = p.map(([x, y]) => [x - cx, y - cy]);
@@ -183,6 +184,8 @@ function renderBlocks() {
   $("#blockArea").textContent = Number.isInteger(Math.round(area * 100) / 100) ? Math.round(area) : `약 ${area.toFixed(1)}`;
   $$("#blockBar [data-act]").forEach(b => { if (["rotL", "rotR", "flipH", "flipV", "dup", "del", "color"].includes(b.dataset.act)) b.disabled = selId == null; });
   $("#blockBar [data-act=undo]").disabled = !hist.length;
+  try { localStorage.setItem("gifted-board", JSON.stringify(pieces)); } catch {}
+  savedNote();
 }
 function svgPoint(evt) {
   const svg = $("#blockSvg"), pt = svg.createSVGPoint();
@@ -305,12 +308,25 @@ function initBlocks() {
     if (map[k]) { e.preventDefault(); act(map[k]); }
     if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); act("undo"); }
   });
-  $("#blockPng").addEventListener("click", () => { const u = blocksToDataURL(); if (u) download(u, "패턴블럭작품.png"); else flash($("#blockPng"), "블록이 없어요"); });
-  $("#blockSend").addEventListener("click", () => {
-    const u = blocksToDataURL(); if (!u) { flash($("#blockSend"), "블록이 없어요"); return; }
-    const counts = {}; pieces.forEach(p => counts[SHAPES[p.type].name] = (counts[SHAPES[p.type].name] || 0) + 1);
-    setUpload(u, "block", `사용한 블록: ${Object.entries(counts).map(([k, v]) => `${k} ${v}개`).join(", ")}\n`);
+  $("#blockPng").addEventListener("click", () => {
+    const u = blocksToDataURL(); if (!u) { flash($("#blockPng"), "블록이 없어요"); return; }
+    if (!needTarget()) return;
+    saveMyBlock();
+    download(u, `패턴블럭_${$("#bTarget").value.trim()}.png`);
   });
+  $("#blockSend").addEventListener("click", () => {
+    const u = blocksToDataURL(), t = $("#bTarget").value.trim();
+    if (!u) { // 실물 블록 사진으로 제출
+      openSend({ act: "block", desc: t ? `${t}\n` : "", pickText: "블록판이 비어 있어요. 실물 블록으로 만든 작품 사진을 골라 주세요." });
+      return;
+    }
+    if (t) saveMyBlock();
+    openSend({ act: "block", image: u, desc: `${t ? t + " — " : ""}사용한 블록: ${countText(blockCounts())} (모두 ${pieces.length}개)\n`, pickText: "실물 블록 사진을 보내려면 여기서 다시 고르기" });
+  });
+  $("#bTarget").addEventListener("input", savedNote);
+  try { const b = JSON.parse(localStorage.getItem("gifted-board") || "[]"); if (Array.isArray(b) && b.length) { pieces = b; nextId = Math.max(...b.map(p => p.id)) + 1; } } catch {}
+  try { myBlock = JSON.parse(localStorage.getItem("gifted-myblock") || "null"); } catch {}
+  if (myBlock && myBlock.target) $("#bTarget").value = myBlock.target;
   renderBlocks();
 }
 function blocksCanvas(scale = 3, pad = 24, bg = "#ffffff") {
@@ -329,6 +345,36 @@ function blocksCanvas(scale = 3, pad = 24, bg = "#ffffff") {
   return cv;
 }
 const blocksToDataURL = () => { const c = blocksCanvas(); return c ? c.toDataURL("image/png") : null; };
+
+/* ---------- ② 에서 저장한 내 작품 (③ 프롬프트에 반영) ---------- */
+let myBlock = null;
+function blockCounts() {
+  return Object.keys(SHAPES).map(k => [PNAME[k], pieces.filter(p => p.type === k).length]).filter(x => x[1]);
+}
+const countText = counts => counts.map(([n, c]) => `${n} ${c}개`).join(", ");
+const boardSig = () => JSON.stringify(pieces.map(p => [p.type, Math.round(p.x), Math.round(p.y), p.rot, p.flip]));
+function needTarget() {
+  if ($("#bTarget").value.trim()) return true;
+  const n = $("#blockSaved"); n.textContent = "먼저 “무엇을 만들었나요?” 칸을 적어 주세요."; n.className = "warn";
+  $("#bTarget").focus(); return false;
+}
+function saveMyBlock() {
+  const c = blocksCanvas(1.5);
+  const rec = { target: $("#bTarget").value.trim(), counts: blockCounts(), total: pieces.length, sig: boardSig(), img: c ? c.toDataURL("image/jpeg", .85) : null, t: Date.now() };
+  myBlock = rec;
+  try { localStorage.setItem("gifted-myblock", JSON.stringify(rec)); }
+  catch { try { localStorage.setItem("gifted-myblock", JSON.stringify({ ...rec, img: null })); } catch {} }
+  applyMyBlockToStyle(true);
+  savedNote();
+}
+function savedNote() {
+  const n = $("#blockSaved"); if (!n) return;
+  n.className = "";
+  if (!myBlock) { n.textContent = "💾 저장하면 ③ 다른 스타일로의 프롬프트에 작품 이름과 블록 개수가 자동으로 들어가요."; return; }
+  const changed = myBlock.sig !== boardSig() || myBlock.target !== $("#bTarget").value.trim();
+  if (changed && pieces.length) { n.textContent = "블록판이 저장한 뒤로 바뀌었어요. 다시 💾 저장하면 ③ 프롬프트도 새로 바뀌어요."; n.className = "warn"; }
+  else { n.textContent = `✓ 저장했어요: ${myBlock.target} · ${countText(myBlock.counts)} — ③ 프롬프트에 반영됐어요.`; n.className = "okc"; }
+}
 
 /* =========================================================
    ③ 스타일 바꾸기 — 프롬프트
@@ -362,7 +408,6 @@ const TESS_PROMPTS = [
   ["에셔처럼", "에셔처럼 [도마뱀]이 서로 맞물려 평면을 빈틈없이 채우는 테셀레이션을 그려 줘.\n[돌리기(회전이동)]로 반복하고, [흑백 판화] 느낌으로."],
   ["바꿔 보기", "[정삼각형]을 기본으로 한 테셀레이션 무늬를 만들어 줘.\n[물고기] 모양이 [돌리기]로 빈틈과 겹침 없이 반복되고,\n[파스텔 수채화] 스타일로."],
   ["두 가지 도형 (영재)", "정육각형과 정삼각형을 한 꼭짓점에 3·6·3·6 순서로 배열한 테셀레이션 무늬를 만들어 줘.\n정육각형 안에는 [별], 정삼각형 안에는 [달]을 그려 줘.\n[밤하늘] 색으로."],
-  ["내 패턴블럭으로", "첨부한 사진은 내가 패턴블럭으로 만든 [새]야.\n이 모양을 한 조각으로 해서 빈틈과 겹침 없이 반복되는 테셀레이션 무늬로 만들어 줘.\n[밀기]로 반복하고, 색은 사진과 비슷하게."],
   ["컵 전사용", "머그컵에 감을 테셀레이션 무늬를 만들어 줘.\n가로:세로 2:1, 왼쪽 끝과 오른쪽 끝이 자연스럽게 이어지게.\n[펭귄] 모양이 빈틈없이 반복되고, 가장자리까지 꽉 차게, 글자 없이."],
   ["틀린 곳 고치기", "빈틈이 보이는 곳이 있어.\n모든 [고양이]가 같은 크기로, 변끼리 딱 맞물리게 다시 그려 줘."],
   ["영어 프롬프트", "A seamless tessellation pattern of [cute cats] based on a [regular hexagon] grid,\nno gaps and no overlaps, [rainbow colors], flat illustration, 2:1 wide, no text."],
@@ -382,6 +427,25 @@ function chipGroup(box, onChange, max = 99) {
   });
 }
 const chosen = box => $$('.chip[aria-pressed="true"]', box).map(c => c.dataset.v);
+let styleBuild = () => {};
+function applyMyBlockToStyle(force) {
+  const box = $("#myWork"); if (!box) return;
+  box.textContent = "";
+  if (myBlock) {
+    if (force || !$("#sTarget").value.trim()) $("#sTarget").value = myBlock.target;
+    if (force) $$('#styleBuilder [data-key="form"] .chip').forEach((c, i) => c.setAttribute("aria-pressed", i === 0));
+    if (myBlock.img) { const im = document.createElement("img"); im.src = myBlock.img; im.alt = "②에서 저장한 내 패턴블럭 작품"; box.append(im); }
+    const d = document.createElement("div");
+    d.innerHTML = `<small>②에서 저장한 내 작품</small><b></b><span class="small"></span><p class="small muted">제미나이에는 이 그림(내 기기에 저장한 파일)을 올려요. 바꾸고 싶으면 ②에서 다시 💾 저장하세요.</p>`;
+    d.querySelector("b").textContent = myBlock.target; d.querySelector("span").textContent = `${countText(myBlock.counts)} (모두 ${myBlock.total}개)`;
+    box.append(d);
+  } else {
+    const d = document.createElement("div");
+    d.innerHTML = `<small>아직 ②에서 저장한 작품이 없어요</small><p class="small">② 블록판에서 <b>💾 내 기기에 저장</b>을 누르면 작품 이름과 블록 개수가 아래 프롬프트에 자동으로 들어가요. 실물 블록 사진이면 ② 대상 칸에 직접 적어요.</p><a class="btn ghost" href="#blocks">② 블록판으로 가기</a>`;
+    box.append(d);
+  }
+  styleBuild();
+}
 function initStyle() {
   const sc = $("#styleChips");
   STYLES.forEach(([n, d], i) => { const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = n; b.dataset.v = n; b.dataset.d = d; b.setAttribute("aria-pressed", i === 0); sc.append(b); });
@@ -392,6 +456,9 @@ function initStyle() {
     const extra = $("#sExtra").value.trim();
     const styleTxt = st.length ? (st.length === 2 ? josa(st[0], "과", "와") + " " + st[1] + " 스타일을 섞어서" : st[0] + " 스타일로") : "다른 스타일로";
     const lines = [`${form} ${josa(target, "이야", "야")}.`];
+    const isBlock = form.includes("패턴블럭");
+    $("#sCountWrap").hidden = !(myBlock && myBlock.counts.length && isBlock);
+    if (!$("#sCountWrap").hidden && $("#sCount").checked) lines.push(`블록은 ${countText(myBlock.counts)}, 모두 ${myBlock.total}개를 썼어.`);
     if ($("#sKeep").checked) lines.push("도형의 모양, 개수, 배치는 그대로 지켜 줘.");
     lines.push(`${styleTxt} 바꿔 줘.`);
     if (extra) lines.push(`추가로: ${extra}`);
@@ -400,7 +467,13 @@ function initStyle() {
   };
   chipGroup($('#styleBuilder [data-key="form"]'), build);
   chipGroup(sc, build, 2);
-  ["#sTarget", "#sExtra", "#sKeep"].forEach(s => $(s).addEventListener("input", build));
+  ["#sTarget", "#sExtra", "#sKeep", "#sCount"].forEach(s => $(s).addEventListener("input", build));
+  styleBuild = build;
+  $("#styleSend").addEventListener("click", () => {
+    const t = $("#sTarget").value.trim(), st = chosen(sc).join("+");
+    openSend({ act: "style", prompt: $("#styleOut").textContent, desc: `${t || "내 작품"}${st ? ` — ${st} 스타일` : ""}\n`, pickText: "제미나이에서 저장한 결과 그림을 골라 주세요." });
+  });
+  applyMyBlockToStyle(false);
   $("#styleCopy").addEventListener("click", e => copyText($("#styleOut").textContent, e.currentTarget));
   build();
   const box = $("#stylePrompts"); STYLE_PROMPTS.forEach(([l, t]) => box.append(promptCard(l, t)));
@@ -425,10 +498,11 @@ function initTessBuilder() {
   $("#tessCopy").addEventListener("click", e => copyText($("#tessOut").textContent, e.currentTarget));
   build();
   const box = $("#tessPrompts"); TESS_PROMPTS.forEach(([l, t]) => box.append(promptCard(l, t)));
-  $$("[data-fill]").forEach(b => b.addEventListener("click", () => {
-    $("#uPrompt").value = $("#" + b.dataset.fill).textContent; $("#uAct").value = b.dataset.actId;
-    go("submit");
-  }));
+  $("#tessAiSend").addEventListener("click", () => openSend({ act: "tessai", prompt: $("#tessOut").textContent, desc: `${$("#tSubject").value.trim() || "테셀레이션"} — 제미나이로 만든 테셀레이션\n`, pickText: "제미나이에서 저장한 테셀레이션 그림을 골라 주세요." }));
+  const tabs = [["#tabA", "#tessA"], ["#tabB", "#tessB"]];
+  tabs.forEach(([t]) => $(t).addEventListener("click", () => tabs.forEach(([t2, p2]) => {
+    const on = t2 === t; $(t2).setAttribute("aria-selected", on); $(p2).hidden = !on;
+  })));
 }
 
 /* ---------- 이미지 도우미 ---------- */
@@ -493,16 +567,17 @@ function initTile() {
   wireDrop($("#tileDrop"), $("#tileFile"), f => fileToImage(f).then(im => { tileImg = im; renderTile(); }).catch(() => {}));
   $("#tileFromBlocks").addEventListener("click", () => {
     const c = blocksCanvas(2, 0, null);
-    if (!c) { flash($("#tileFromBlocks"), "② 작업판이 비어 있어요"); return; }
-    tileImg = c; renderTile();
+    if (c) { tileImg = c; renderTile(); return; }
+    if (myBlock && myBlock.img) { loadImage(myBlock.img).then(im => { tileImg = im; renderTile(); }); return; }
+    flash($("#tileFromBlocks"), "② 블록판이 비어 있어요");
   });
   $$("#tileModes .chip").forEach(b => b.addEventListener("click", () => {
     $$("#tileModes .chip").forEach(c => c.setAttribute("aria-pressed", c === b)); tileMode = b.dataset.m; renderTile();
   }));
   $("#tileSize").addEventListener("input", renderTile);
-  $("#tilePng").addEventListener("click", () => download($("#tileCanvas").toDataURL("image/png"), "나의테셀레이션.png"));
+  $("#tilePng").addEventListener("click", () => download($("#tileCanvas").toDataURL("image/png"), "테셀레이션_직접만들기.png"));
   $("#tileToMug").addEventListener("click", () => { loadImage($("#tileCanvas").toDataURL("image/png")).then(im => { mugImg = im; setFit("cover"); renderMug(); go("mug"); }); });
-  $("#tileSend").addEventListener("click", () => setUpload($("#tileCanvas").toDataURL("image/jpeg", .9), "tess", `직접 만든 테셀레이션 (움직임: ${$("#tileModes [aria-pressed=true]").textContent})\n`));
+  $("#tileSend").addEventListener("click", () => setUpload($("#tileCanvas").toDataURL("image/jpeg", .9), "tess", `직접 만든 테셀레이션 (움직임: ${$("#tileModes [aria-pressed=true]").textContent})\n`, "다른 그림을 보내려면 여기서 고르기"));
   renderTile();
 }
 
@@ -613,13 +688,70 @@ async function compress(src, max = 1600) {
   while (url.length > 3.6e6 && q > .5) { q -= .1; url = c.toDataURL("image/jpeg", q); }
   return url;
 }
-async function setUpload(src, act, descPrefix = "") {
-  try { upData = await compress(src); } catch { return; }
-  $("#upThumb").src = upData; $("#upThumb").hidden = false; $("#upDropText").textContent = "다른 이미지로 바꾸려면 다시 고르기";
-  if (act) $("#uAct").value = act;
-  if (descPrefix && !$("#uDesc").value.startsWith(descPrefix)) $("#uDesc").value = descPrefix + $("#uDesc").value;
-  setStatus("");
-  go("submit");
+function setUpload(src, act, descPrefix = "", pickText) { openSend({ act, image: src, desc: descPrefix, pickText }); }
+
+/* ---------- 보낸 기록 (이 기기) ---------- */
+const ACT_NAMES = { block: "② 패턴블럭 작품", style: "③ 다른 스타일로 (제미나이 결과)", tess: "④ 테셀레이션 A · 직접 만들기", tessai: "④ 테셀레이션 B · 제미나이", mug: "⑤ 컵 디자인", etc: "기타" };
+const sentLog = () => { try { return JSON.parse(localStorage.getItem("gifted-sent") || "[]"); } catch { return []; } };
+function logSent(act) { const l = sentLog(); l.push({ act, t: Date.now() }); try { localStorage.setItem("gifted-sent", JSON.stringify(l.slice(-200))); } catch {} renderSent(); }
+function renderSent() {
+  const l = sentLog();
+  $$("[data-sent]").forEach(el => { const n = l.filter(x => x.act === el.dataset.sent).length; el.textContent = n ? `✓ 이 기기에서 ${n}개 보냄` : ""; });
+  const ul = $("#sentList"); if (!ul) return; ul.textContent = "";
+  if (!l.length) { const li = document.createElement("li"); li.className = "muted"; li.textContent = "아직 보낸 작품이 없어요."; ul.append(li); return; }
+  l.slice(-15).reverse().forEach(x => {
+    const li = document.createElement("li"), d = new Date(x.t);
+    li.textContent = `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")} · ${ACT_NAMES[x.act] || "기타"}`;
+    ul.append(li);
+  });
+}
+async function postWork(body) {
+  const r = await fetch("api/upload", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || "보내지 못했어요.");
+  try { localStorage.setItem("gifted-name", body.name); localStorage.setItem("gifted-group", body.group); } catch {}
+  logSent(body.activity);
+}
+let needCode = false;
+
+/* ---------- 공용 제출 창 ---------- */
+let sd = null;
+const sdStatus = (t, kind) => { const s = $("#sdStatus"); s.textContent = t; s.className = "status" + (kind ? " " + kind : ""); };
+function sdSetImage(u) { sd.data = u; $("#sdThumb").src = u; $("#sdThumb").hidden = false; }
+async function openSend(o) {
+  sd = { ...o, data: null };
+  $("#sdBody").hidden = false; $("#sdDone").hidden = true; sdStatus("");
+  $("#sdAct").textContent = "보내는 활동: " + (ACT_NAMES[o.act] || "기타");
+  $("#sdThumb").hidden = true; $("#sdFile").value = "";
+  $("#sdDropText").textContent = o.pickText || "보낼 그림을 고르거나 여기에 끌어다 놓기";
+  $("#sdDesc").value = o.desc || ""; $("#sdDesc").placeholder = "어떤 작품인지, 어떤 도형 · 움직임을 썼는지 적어요";
+  $("#sdPromptWrap").hidden = o.prompt == null; $("#sdPrompt").value = o.prompt || "";
+  $("#sdCodeWrap").hidden = !needCode;
+  try { $("#sdName").value = localStorage.getItem("gifted-name") || ""; $("#sdGroup").value = localStorage.getItem("gifted-group") || ""; } catch {}
+  $("#sendDlg").showModal();
+  if (o.image) { try { sdSetImage(await compress(o.image)); } catch {} }
+}
+function initSend() {
+  const dlg = $("#sendDlg");
+  $("#sdClose").addEventListener("click", () => dlg.close());
+  $("#sdOk").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+  wireDrop($("#sdDrop"), $("#sdFile"), f => fileToImage(f).then(im => compress(im)).then(sdSetImage).catch(() => sdStatus("그림 파일을 골라 주세요.", "err")));
+  $("#sdForm").addEventListener("submit", async e => {
+    e.preventDefault(); if (!sd) return;
+    const name = $("#sdName").value.trim();
+    if (!name) { sdStatus("이름(별명)을 적어 주세요.", "err"); $("#sdName").focus(); return; }
+    if (!sd.data) { sdStatus("보낼 그림을 골라 주세요.", "err"); return; }
+    const btn = $("#sdBtn"); btn.disabled = true; sdStatus("보내는 중…");
+    try {
+      await postWork({ name, group: $("#sdGroup").value.trim(), activity: sd.act, desc: $("#sdDesc").value, prompt: $("#sdPrompt").value, code: $("#sdCode").value.trim(), image: sd.data });
+      const n = sentLog().filter(x => x.act === sd.act).length;
+      $("#sdBody").hidden = true; $("#sdDone").hidden = false; sdStatus("");
+      $("#sdDoneMsg").textContent = `‘${ACT_NAMES[sd.act]}’에서 이 기기로 지금까지 ${n}개 보냈어요. 작품을 고치거나 새로 만들면 또 보내도 돼요.`;
+    } catch (err) { sdStatus(err.message || "보내지 못했어요. 잠시 뒤 다시 눌러 주세요.", "err"); }
+    finally { btn.disabled = false; }
+  });
+  renderSent();
 }
 function setStatus(t, kind) { const s = $("#uStatus"); s.textContent = t; s.className = "status" + (kind ? " " + kind : ""); }
 function initUpload() {
@@ -628,7 +760,7 @@ function initUpload() {
   }).catch(() => setStatus("이미지 파일을 골라 주세요.", "err")));
   try { const n = localStorage.getItem("gifted-name"); if (n) $("#uName").value = n; const g = localStorage.getItem("gifted-group"); if (g) $("#uGroup").value = g; } catch {}
   fetch("api/config").then(r => r.json()).then(c => {
-    if (c.needCode) $("#uCodeWrap").hidden = false;
+    if (c.needCode) { $("#uCodeWrap").hidden = false; needCode = true; }
     if (!c.ready) setStatus("아직 저장소가 연결되지 않았어요. (선생님: README의 Blob 연결 단계를 확인하세요)", "err");
   }).catch(() => setStatus("이 화면은 미리보기라 올리기가 꺼져 있어요. 배포된 주소에서 올려 주세요.", "err"));
 
@@ -639,14 +771,8 @@ function initUpload() {
     if (!upData) { setStatus("올릴 이미지를 골라 주세요.", "err"); return; }
     const btn = $("#uBtn"); btn.disabled = true; setStatus("보내는 중…");
     try {
-      const r = await fetch("api/upload", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, group: $("#uGroup").value.trim(), activity: $("#uAct").value, desc: $("#uDesc").value, prompt: $("#uPrompt").value, code: $("#uCode").value.trim(), image: upData }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || "보내지 못했어요.");
-      try { localStorage.setItem("gifted-name", name); localStorage.setItem("gifted-group", $("#uGroup").value.trim()); } catch {}
-      setStatus("선생님께 보냈어요! 🎉 다음 작품도 올릴 수 있어요.", "ok");
+      await postWork({ name, group: $("#uGroup").value.trim(), activity: $("#uAct").value, desc: $("#uDesc").value, prompt: $("#uPrompt").value, code: $("#uCode").value.trim(), image: upData });
+      setStatus("선생님께 보냈어요! 🎉 다른 작품도 또 보낼 수 있어요.", "ok");
       upData = null; $("#upThumb").hidden = true; $("#upDropText").textContent = "사진을 고르거나 여기에 끌어다 놓기"; $("#uFile").value = ""; $("#uDesc").value = ""; $("#uPrompt").value = "";
     } catch (err) { setStatus(err.message || "보내지 못했어요. 잠시 뒤 다시 눌러 주세요.", "err"); }
     finally { btn.disabled = false; }
@@ -655,7 +781,7 @@ function initUpload() {
 
 
 /* ---------- 화면 전환 (랜딩 ↔ 하위 페이지) ---------- */
-const PAGES = [["explore", "① 테셀레이션 탐구"], ["blocks", "② 패턴블럭 작품"], ["style", "③ 다른 스타일로"], ["tess", "④ 테셀레이션 뽑기"], ["mug", "⑤ 컵에 전사하기"], ["submit", "작품 올리기"]];
+const PAGES = [["explore", "① 테셀레이션 탐구"], ["blocks", "② 패턴블럭 작품"], ["style", "③ 다른 스타일로"], ["tess", "④ 테셀레이션 만들기"], ["mug", "⑤ 컵에 전사하기"], ["submit", "작품 올리기"]];
 function go(id) { if (location.hash === "#" + id) route(); else location.hash = id; }
 function route() {
   const id = location.hash.slice(1);
@@ -672,8 +798,9 @@ function route() {
   } else document.title = "도형이 예술이 되는 시간 · 응석쌤 수학영재수업";
   window.scrollTo(0, 0);
   if (id === "mug") renderMug();
+  if (id === "style") applyMyBlockToStyle(false);
 }
 window.addEventListener("hashchange", route);
 
-initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initUpload(); route();
+initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initUpload(); initSend(); route();
 })();
