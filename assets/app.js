@@ -146,6 +146,7 @@ for (const k in SHAPES) { // 무게중심을 원점으로
 }
 const EXTRA_COLORS = ["#ffc23d", "#ff6b6b", "#4f8ff7", "#2ec4a0", "#ff9f43", "#d9b98c", "#8b7bff", "#ff8fc7", "#2b3050", "#ffffff"];
 let pieces = [], selId = null, nextId = 1, snapOn = true;
+let vtx = null; // 회전 손잡이를 띄운 꼭짓점 {id, i}
 const hist = [];
 const pushHist = () => { hist.push(JSON.stringify(pieces)); if (hist.length > 60) hist.shift(); };
 
@@ -162,11 +163,25 @@ function renderBlocks() {
     g.append(svgEl("polygon", { points: worldPts(p).map(q => q.join(",")).join(" "), fill: fillOf(p), stroke: "rgba(0,0,0,.35)", "stroke-width": 1.5, "stroke-linejoin": "round" }));
     svg.append(g);
   });
+  const vi = vtxInfo();
+  if (vi) { // 꼭짓점 회전 손잡이
+    const [vx, vy] = vi.v, px = -vi.dy, py = vi.dx, cl = (a, lo, hi) => Math.max(lo, Math.min(hi, a));
+    const g = svgEl("g", { class: "vh" });
+    g.append(svgEl("circle", { class: "vh-dot", cx: vx, cy: vy, r: 7 }));
+    [[-30, "↺", -1], [30, "↻", 1]].forEach(([deg, lab, side]) => {
+      const bx = cl(vx + vi.dx * 34 + px * 22 * side, 20, 880), by = cl(vy + vi.dy * 34 + py * 22 * side, 20, 580);
+      const b = svgEl("g", { class: "vh-btn", "data-rot": deg });
+      const t = svgEl("title"); t.textContent = deg < 0 ? "이 꼭짓점을 중심으로 왼쪽으로 30°" : "이 꼭짓점을 중심으로 오른쪽으로 30°";
+      const tx = svgEl("text", { x: bx, y: by }); tx.textContent = lab;
+      b.append(t, svgEl("circle", { cx: bx, cy: by, r: 19 }), tx); g.append(b);
+    });
+    svg.append(g);
+  }
   $("#blockHint").hidden = pieces.length > 0;
   $("#blockCount").textContent = `블록 ${pieces.length}개`;
   const area = pieces.reduce((s, p) => s + SHAPES[p.type].area, 0);
   $("#blockArea").textContent = Number.isInteger(Math.round(area * 100) / 100) ? Math.round(area) : `약 ${area.toFixed(1)}`;
-  $$("#blockBar [data-act]").forEach(b => { if (["rotL", "rotR", "flip", "dup", "del", "color"].includes(b.dataset.act)) b.disabled = selId == null; });
+  $$("#blockBar [data-act]").forEach(b => { if (["rotL", "rotR", "flipH", "flipV", "dup", "del", "color"].includes(b.dataset.act)) b.disabled = selId == null; });
   $("#blockBar [data-act=undo]").disabled = !hist.length;
 }
 function svgPoint(evt) {
@@ -186,6 +201,30 @@ function snapPiece(p) {
   });
   if (best) { p.x += best.dx; p.y += best.dy; }
 }
+function vtxInfo() {
+  if (!vtx) return null;
+  const p = pieces.find(q => q.id === vtx.id); if (!p) return null;
+  const v = worldPts(p)[vtx.i]; if (!v) return null;
+  if (vtx.dx != null) return { p, v, dx: vtx.dx, dy: vtx.dy }; // 돌리는 동안 버튼 위치 고정
+  const L = Math.hypot(v[0] - p.x, v[1] - p.y) || 1;
+  return { p, v, dx: (v[0] - p.x) / L, dy: (v[1] - p.y) / L };
+}
+function hitVertex(pt, r) { // 선택된 블록 → 위에 있는 블록 순서로 가까운 꼭짓점 찾기
+  const order = [...pieces].reverse().sort((a, b) => (b.id === selId) - (a.id === selId));
+  let best = null;
+  for (const p of order) worldPts(p).forEach((v, i) => {
+    const d = Math.hypot(v[0] - pt.x, v[1] - pt.y);
+    if (d < r && (!best || d < best.d - 0.5)) best = { id: p.id, i, d };
+  });
+  return best && { id: best.id, i: best.i };
+}
+function rotateAbout(p, i, deg) { // 꼭짓점 i를 중심으로 돌리기 (꼭짓점은 제자리)
+  pushHist();
+  const [vx, vy] = worldPts(p)[i], t = deg * Math.PI / 180, c = Math.cos(t), s = Math.sin(t);
+  const ox = p.x - vx, oy = p.y - vy;
+  p.x = vx + ox * c - oy * s; p.y = vy + ox * s + oy * c;
+  p.rot = ((p.rot + deg) % 360 + 360) % 360;
+}
 function addPiece(type) {
   pushHist();
   const n = pieces.length;
@@ -201,11 +240,14 @@ function act(a) {
   pushHist();
   if (a === "rotL") p.rot = (p.rot - 30 + 360) % 360;
   if (a === "rotR") p.rot = (p.rot + 30) % 360;
-  if (a === "flip") p.flip = !p.flip;
+  // 뒤집기는 화면 기준 축으로: 좌우 = 세로축 대칭, 상하 = 가로축 대칭
+  if (a === "flipH") { p.flip = !p.flip; p.rot = (360 - p.rot) % 360; }
+  if (a === "flipV") { p.flip = !p.flip; p.rot = (540 - p.rot) % 360; }
   if (a === "del") { pieces = pieces.filter(q => q !== p); selId = null; }
   if (a === "dup") { const c = { ...p, id: nextId++, x: p.x + 30, y: p.y + 30 }; pieces.push(c); selId = c.id; }
   if (a === "color") { const cur = p.color ? EXTRA_COLORS.indexOf(p.color) : -1; p.color = cur >= EXTRA_COLORS.length - 1 ? null : EXTRA_COLORS[cur + 1]; }
-  if (a === "rotL" || a === "rotR" || a === "flip") snapPiece(p);
+  if (["rotL", "rotR", "flipH", "flipV"].includes(a)) snapPiece(p);
+  if (a !== "color") vtx = null;
   renderBlocks();
 }
 let clearArmed = 0;
@@ -219,32 +261,47 @@ function initBlocks() {
   const svg = $("#blockSvg"); svg.setAttribute("tabindex", "0");
   $$("#blockBar [data-add]").forEach(b => b.addEventListener("click", () => addPiece(b.dataset.add)));
   $$("#blockBar [data-act]").forEach(b => b.addEventListener("click", () => act(b.dataset.act)));
-  let drag = null;
+  let drag = null, lastSpin = 0;
   svg.addEventListener("pointerdown", e => {
-    const g = e.target.closest(".piece");
+    const btn = e.target.closest(".vh-btn"), vi = vtxInfo();
+    if (btn && vi) { // 꼭짓점 중심 회전
+      e.preventDefault(); lastSpin = Date.now();
+      vtx = { ...vtx, dx: vi.dx, dy: vi.dy }; rotateAbout(vi.p, vtx.i, +btn.dataset.rot); selId = vi.p.id; renderBlocks(); return;
+    }
+    const vhit = hitVertex(svgPoint(e), e.pointerType === "mouse" ? 12 : 22);
+    vtx = null;
+    let g = e.target.closest(".piece");
+    if (!g && vhit) { selId = vhit.id; vtx = vhit; renderBlocks(); return; } // 블록 바깥쪽 꼭짓점 근처를 눌렀을 때
     if (!g) { selId = null; renderBlocks(); return; }
     const p = pieces.find(q => q.id === +g.dataset.id); if (!p) return;
     pushHist();
     // 맨 위로
     pieces = pieces.filter(q => q !== p); pieces.push(p);
     selId = p.id;
-    const pt = svgPoint(e); drag = { p, dx: pt.x - p.x, dy: pt.y - p.y, moved: false };
+    const pt = svgPoint(e); drag = { p, dx: pt.x - p.x, dy: pt.y - p.y, moved: false, vhit };
     svg.setPointerCapture(e.pointerId); renderBlocks(); e.preventDefault();
   });
   svg.addEventListener("pointermove", e => {
-    if (!drag) return;
+    if (!drag) { // 마우스: 꼭짓점에 올리면 회전 버튼 보이기
+      if (e.pointerType !== "mouse" || e.target.closest(".vh-btn")) return;
+      const pt = svgPoint(e), h = hitVertex(pt, 12), vi = vtxInfo();
+      if (h) { if (!vtx || h.id !== vtx.id || h.i !== vtx.i) { vtx = h; renderBlocks(); } }
+      else if (vi && Math.hypot(pt.x - vi.v[0], pt.y - vi.v[1]) > 70) { vtx = null; renderBlocks(); }
+      return;
+    }
     const pt = svgPoint(e);
     drag.p.x = Math.max(0, Math.min(900, pt.x - drag.dx)); drag.p.y = Math.max(0, Math.min(600, pt.y - drag.dy)); drag.moved = true;
     renderBlocks();
   });
-  const end = () => { if (!drag) return; if (drag.moved) snapPiece(drag.p); else hist.pop(); drag = null; renderBlocks(); };
+  const end = () => { if (!drag) return; if (drag.moved) snapPiece(drag.p); else { hist.pop(); if (drag.vhit) vtx = drag.vhit; } drag = null; renderBlocks(); };
   svg.addEventListener("pointerup", end); svg.addEventListener("pointercancel", end);
-  svg.addEventListener("dblclick", e => { if (e.target.closest(".piece")) act("rotR"); });
+  svg.addEventListener("pointerleave", e => { if (e.pointerType === "mouse" && !drag && vtx) { vtx = null; renderBlocks(); } });
+  svg.addEventListener("dblclick", e => { if (Date.now() - lastSpin < 700 || vtx) return; if (e.target.closest(".piece")) act("rotR"); });
   svg.addEventListener("keydown", e => {
     const p = pieces.find(q => q.id === selId);
     const k = e.key.toLowerCase();
     if (p && k.startsWith("arrow")) { e.preventDefault(); const d = e.shiftKey ? 20 : 4; if (k === "arrowleft") p.x -= d; if (k === "arrowright") p.x += d; if (k === "arrowup") p.y -= d; if (k === "arrowdown") p.y += d; renderBlocks(); return; }
-    const map = { q: "rotL", e: "rotR", f: "flip", d: "dup", delete: "del", backspace: "del" };
+    const map = { q: "rotL", e: "rotR", f: "flipH", v: "flipV", d: "dup", delete: "del", backspace: "del" };
     if (map[k]) { e.preventDefault(); act(map[k]); }
     if ((e.ctrlKey || e.metaKey) && k === "z") { e.preventDefault(); act("undo"); }
   });

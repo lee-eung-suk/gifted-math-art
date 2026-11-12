@@ -125,7 +125,8 @@
         <span class="sep"></span>
         <button class="tbtn" type="button" data-act="rotL" title="왼쪽으로 30° (Q)">↺ 30°</button>
         <button class="tbtn" type="button" data-act="rotR" title="오른쪽으로 30° (E)">↻ 30°</button>
-        <button class="tbtn" type="button" data-act="flip" title="뒤집기 (F)">⇋ 뒤집기</button>
+        <button class="tbtn" type="button" data-act="flipH" title="좌우 뒤집기 (F)">⇋ 좌우 뒤집기</button>
+        <button class="tbtn" type="button" data-act="flipV" title="상하 뒤집기 (V)">⇅ 상하 뒤집기</button>
         <button class="tbtn" type="button" data-act="dup" title="복제 (D)">⧉ 복제</button>
         <button class="tbtn" type="button" data-act="color">🎨 색</button>
         <button class="tbtn" type="button" data-act="del" title="삭제 (Delete)">🗑 삭제</button>
@@ -136,7 +137,7 @@
       </div>
       <div class="canvas-wrap">
         <svg id="blockSvg" viewBox="0 0 900 600" role="application" aria-label="패턴블럭 작업판"></svg>
-        <div class="hint" id="blockHint">위 버튼으로 블록을 꺼내 끌어 옮기세요 · 두 번 누르면 회전 · 꼭짓점끼리 자석처럼 붙어요</div>
+        <div class="hint" id="blockHint">위 버튼으로 블록을 꺼내 끌어 옮기세요 · 꼭짓점에 마우스를 올리거나 꼭짓점을 누르면 그 점을 중심으로 돌리는 버튼이 나와요 · 꼭짓점끼리 자석처럼 붙어요</div>
       </div>
       <div class="toolbar" style="border-top:1px solid var(--line);border-bottom:0">
         <span class="small muted" id="blockCount">블록 0개</span>

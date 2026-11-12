@@ -151,6 +151,11 @@ input[type=file]{padding:8px}
 #blockSvg{display:block;width:100%;height:auto;touch-action:none;user-select:none;-webkit-user-select:none}
 #blockSvg .piece{cursor:grab}
 #blockSvg .piece.sel polygon{stroke:var(--fg);stroke-width:3;stroke-dasharray:6 4}
+#blockSvg .vh-dot{fill:var(--fg);stroke:var(--bg);stroke-width:3;pointer-events:none}
+#blockSvg .vh-btn{cursor:pointer}
+#blockSvg .vh-btn circle{fill:var(--fg);stroke:var(--bg);stroke-width:3;filter:drop-shadow(0 2px 3px rgba(0,0,0,.25))}
+#blockSvg .vh-btn:hover circle{fill:var(--rho)}
+#blockSvg .vh-btn text{fill:var(--bg);font-size:20px;font-weight:800;text-anchor:middle;dominant-baseline:central;pointer-events:none}
 .hint{position:absolute;inset:auto 10px 10px 10px;text-align:center;color:var(--muted);font-size:14px;pointer-events:none}
 
 /* 꼭짓점 탐구 */

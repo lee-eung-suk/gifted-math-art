@@ -39,7 +39,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
     <header class="bar" style="margin-top:28px">
       <h2 style="margin-right:auto">학생 작품함 <span class="muted" id="count"></span></h2>
       <button class="btn ghost" type="button" id="refresh">새로고침</button>
-      <button class="btn" type="button" id="zipAll">보이는 작품 ZIP 다운로드</button>
+      <button class="btn" type="button" id="zipAll">전체 작품 ZIP 다운로드</button>
     </header>
     <div class="bar">
       <div class="chips" id="filters"></div>
@@ -92,6 +92,7 @@ function render() {
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", id === filter); b.textContent = `${n} ${c}`;
     b.onclick = () => { filter = id; render(); }; f.append(b);
   });
+  zipLabel();
   const list = visible();
   $("#count").textContent = `${list.length}개`;
   const box = $("#cards"); box.textContent = "";
@@ -135,24 +136,33 @@ $("#login").addEventListener("submit", async e => {
   if (await load()) { try { sessionStorage.setItem("tkey", key); } catch {} }
 });
 $("#refresh").onclick = load;
+const zipLabel = () => { $("#zipAll").textContent = filter === "all" ? "전체 작품 ZIP 다운로드" : "이 활동 작품 ZIP 다운로드"; };
 $("#zipAll").onclick = async () => {
   const list = visible(); if (!list.length) return;
-  const b = $("#zipAll"); b.disabled = true;
+  const b = $("#zipAll"); b.disabled = true; $("#msg").textContent = "";
   try {
-    const zip = new JSZip(); const used = new Set(); let csv = "﻿활동,이름,모둠,시간,파일,작품설명,프롬프트\n";
-    for (let i = 0; i < list.length; i++) {
-      const it = list[i]; b.textContent = `묶는 중 ${i + 1}/${list.length}`;
-      let n = fileName(it); if (used.has(n)) n = fileName(it, i); used.add(n);
-      const blob = await (await fetch(await imageURL(it))).blob();
-      zip.file(`${safe(ACT[it.activity] || "기타")}/${n}`, blob);
-      const q = s => `"${String(s || "").replace(/"/g, '""')}"`;
-      csv += [ACT[it.activity], it.name, it.group, new Date(it.createdAt).toLocaleString("ko-KR"), n, it.desc, it.prompt].map(q).join(",") + "\n";
-    }
-    zip.file("작품목록.csv", csv);
+    const zip = new JSZip(); const used = new Set(); const q = s => `"${String(s || "").replace(/"/g, '""')}"`;
+    const names = list.map((it, i) => { let n = fileName(it); if (used.has(n)) n = fileName(it, i); used.add(n); return n; });
+    const rows = new Array(list.length), failed = []; let done = 0, next = 0;
+    const worker = async () => { // 4장씩 동시에 받기, 실패한 파일은 건너뛰기
+      while (next < list.length) {
+        const i = next++, it = list[i], n = names[i];
+        try {
+          const r = await fetch(await imageURL(it)); if (!r.ok) throw 0;
+          zip.file(`${safe(ACT[it.activity] || "기타")}/${n}`, await r.blob());
+          rows[i] = [ACT[it.activity], it.name, it.group, new Date(it.createdAt).toLocaleString("ko-KR"), n, it.desc, it.prompt].map(q).join(",");
+        } catch { failed.push(`${it.name} (${ACT[it.activity] || "기타"})`); }
+        b.textContent = `묶는 중 ${++done}/${list.length}`;
+      }
+    };
+    await Promise.all([...Array(Math.min(4, list.length))].map(worker));
+    zip.file("작품목록.csv", "\ufeff활동,이름,모둠,시간,파일,작품설명,프롬프트\n" + rows.filter(Boolean).join("\n") + "\n");
+    b.textContent = "ZIP 만드는 중…";
     const out = await zip.generateAsync({ type: "blob" });
     const d = new Date(); download(URL.createObjectURL(out), `수학영재반_작품_${d.getMonth() + 1}월${d.getDate()}일.zip`);
+    if (failed.length) $("#msg").textContent = `${failed.length}개는 받지 못해 빠졌어요: ${failed.join(", ")}`;
   } catch { $("#msg").textContent = "ZIP을 만들지 못했어요."; }
-  b.disabled = false; b.textContent = "보이는 작품 ZIP 다운로드";
+  b.disabled = false; zipLabel();
 };
 $("#viewer").addEventListener("click", () => $("#viewer").close());
 if (key) { $("#login").hidden = true; $("#app").hidden = false; load(); }
