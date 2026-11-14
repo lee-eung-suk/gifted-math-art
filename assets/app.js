@@ -409,6 +409,10 @@ const TESS_PROMPTS = [
   ["바꿔 보기", "[정삼각형]을 기본으로 한 테셀레이션 무늬를 만들어 줘.\n[물고기] 모양이 [돌리기]로 빈틈과 겹침 없이 반복되고,\n[파스텔 수채화] 스타일로."],
   ["두 가지 도형 (영재)", "정육각형과 정삼각형을 한 꼭짓점에 3·6·3·6 순서로 배열한 테셀레이션 무늬를 만들어 줘.\n정육각형 안에는 [별], 정삼각형 안에는 [달]을 그려 줘.\n[밤하늘] 색으로."],
   ["컵 전사용", "머그컵에 감을 테셀레이션 무늬를 만들어 줘.\n가로:세로 2:1, 왼쪽 끝과 오른쪽 끝이 자연스럽게 이어지게.\n[펭귄] 모양이 빈틈없이 반복되고, 가장자리까지 꽉 차게, 글자 없이."],
+  ["틀에서 벗어나기 (창의)", "육각형, 사각형에 너무 얽매여 있어.\n좀 더 창의적이고 다양한 형태의 조각들이 자유롭게 맞물려 반복되게 다시 그려 줘.\n빈틈과 겹침은 그대로 없게."],
+  ["변을 구불구불하게 (에셔 방법)", "[정사각형]의 위쪽 변을 [구름 모양]으로 튀어나오게 하고, 아래쪽 변은 그만큼 똑같이 들어가게 바꿔 줘.\n이렇게 만든 조각이 [양] 모양이 되어 밀기로 빈틈없이 반복되는 테셀레이션을 그려 줘."],
+  ["모두 조금씩 다르게", "모든 [고양이]가 똑같지 않게 표정, 자세, 소품을 조금씩 다르게 바꿔 줘.\n조각끼리 맞물리는 테두리 모양은 그대로 둬."],
+  ["여러 모양 섞기 (창의)", "[바닷속 생물]이 주인공인 테셀레이션을 만들어 줘.\n[물고기], [문어], [불가사리]처럼 서로 다른 모양의 조각들이 퍼즐처럼 빈틈과 겹침 없이 맞물리고,\n이 묶음이 [밀기]로 계속 되풀이되게."],
   ["틀린 곳 고치기", "빈틈이 보이는 곳이 있어.\n모든 [고양이]가 같은 크기로, 변끼리 딱 맞물리게 다시 그려 줘."],
   ["영어 프롬프트", "A seamless tessellation pattern of [cute cats] based on a [regular hexagon] grid,\nno gaps and no overlaps, [rainbow colors], flat illustration, 2:1 wide, no text."],
 ];
@@ -485,16 +489,34 @@ function initTessBuilder() {
     const move = chosen($('#tessBuilder [data-key="move"]'))[0];
     const style = $("#tStyle").value.trim();
     const use = chosen($('#tessBuilder [data-key="use"]'))[0];
-    const lines = [
-      `${josa(shape, "을", "를")} 기본 도형으로 한 테셀레이션 무늬를 만들어 줘.`,
-      `${subj} 모양이 ${josa(move, "으로", "로")} 빈틈과 겹침 없이 반복되고,`,
-      style ? `${josa(style, "으로", "로")} 그려 줘.` : "알록달록하게 그려 줘.",
-      use === "mug" ? "머그컵에 감을 거라서 가로:세로 2:1로, 왼쪽 끝과 오른쪽 끝이 자연스럽게 이어지고 가장자리까지 꽉 차게. 글자는 넣지 마." : "정사각형 이미지로, 글자는 넣지 마.",
-    ];
+    const free = chosen($('#tessBuilder [data-key="free"]'))[0] || "strict";
+    $("#tShapeField").classList.toggle("off", free === "free");
+    $("#tFreeDesc").textContent = {
+      strict: "정해진 도형 칸 안에 그림이 들어가요. 수학 규칙이 가장 잘 보여요.",
+      bend: "도형의 한 변을 튀어나오게 하면 맞은편 변은 그만큼 들어가요. 조각이 그림 모양 그대로 맞물려요.",
+      free: "기본 도형은 쓰지 않아요. 여러 모양 조각이 퍼즐처럼 맞물리고, 되풀이되는 묶음을 찾아보는 게 숙제!",
+    }[free];
+    const lines = [];
+    if (free === "strict") {
+      lines.push(`${josa(shape, "을", "를")} 기본 도형으로 한 테셀레이션 무늬를 만들어 줘.`, `${subj} 모양이 ${josa(move, "으로", "로")} 빈틈과 겹침 없이 반복되고,`);
+    } else if (free === "bend") {
+      lines.push(`${josa(shape, "을", "를")} 바탕으로 하되, 곧은 변을 곡선으로 바꾼 테셀레이션 무늬를 만들어 줘.`,
+        "한 변에서 튀어나온 만큼 맞은편 변은 똑같이 들어가게 해서,",
+        `조각 하나하나가 ${subj} 모양 그대로 퍼즐처럼 맞물리게 해 줘.`,
+        `${josa(move, "으로", "로")} 빈틈과 겹침 없이 반복되고,`);
+    } else {
+      lines.push(`${josa(subj, "이", "가")} 주인공인 자유로운 테셀레이션 무늬를 만들어 줘.`,
+        "육각형, 사각형 같은 정해진 틀에 얽매이지 말고, 곡선과 여러 가지 모양의 조각들이 퍼즐처럼 맞물리게 해 줘.",
+        "조각의 모양과 크기는 다양해도 되지만, 빈틈과 겹침은 없게.",
+        `전체 무늬는 ${josa(move, "으로", "로")} 되풀이되고,`);
+    }
+    if ($("#tVary").checked) lines.push(`${subj}마다 표정, 자세, 소품을 조금씩 다르게 해 줘.`);
+    lines.push(style ? `${josa(style, "으로", "로")} 그려 줘.` : "알록달록하게 그려 줘.",
+      use === "mug" ? "머그컵에 감을 거라서 가로:세로 2:1로, 왼쪽 끝과 오른쪽 끝이 자연스럽게 이어지고 가장자리까지 꽉 차게. 글자는 넣지 마." : "정사각형 이미지로, 글자는 넣지 마.");
     $("#tessOut").textContent = lines.join("\n");
   };
   $$("#tessBuilder .chips").forEach(c => chipGroup(c, build));
-  ["#tSubject", "#tStyle"].forEach(s => $(s).addEventListener("input", build));
+  ["#tSubject", "#tStyle", "#tVary"].forEach(s => $(s).addEventListener("input", build));
   $("#tessCopy").addEventListener("click", e => copyText($("#tessOut").textContent, e.currentTarget));
   build();
   const box = $("#tessPrompts"); TESS_PROMPTS.forEach(([l, t]) => box.append(promptCard(l, t)));

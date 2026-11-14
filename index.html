@@ -31,7 +31,7 @@
     <a class="card-link" href="#mug" style="--acc:var(--sq);--acc-l:var(--sq-l)"><span class="pb sq"></span><small>5차시</small><b>컵에 전사하기</b><span class="d">좌우반전 · 머그프레스</span></a>
     <a class="card-link up" href="#submit" style="--acc:var(--vio);--acc-l:var(--vio-l)"><span class="pb hex" style="background:var(--vio)"></span><small>제출</small><b>작품 올리기</b><span class="d">다른 사진 올리기 · 내가 보낸 작품</span></a>
   </nav>
-  <p class="land-foot">경북 소천초등학교 이응석 · <a href="teacher.html">교사용</a></p>
+  <p class="land-foot">경북 소천초등학교 이응석 <a class="teacher-btn" href="teacher.html">🔒 교사용 작품함</a></p>
 </div>
 
 <!-- 하위 페이지 상단 바 -->
@@ -297,7 +297,7 @@
       <div class="box">
         <h4>테셀레이션 프롬프트 조립기</h4>
         <div class="builder" id="tessBuilder">
-          <div class="field"><span>기본 도형</span>
+          <div class="field" id="tShapeField"><span>기본 도형</span>
             <div class="chips" data-key="shape" data-single>
               <button class="chip" type="button" aria-pressed="true" data-v="정육각형">정육각형</button>
               <button class="chip" type="button" data-v="정삼각형">정삼각형</button>
@@ -306,7 +306,15 @@
               <button class="chip" type="button" data-v="정육각형과 정삼각형(3·6·3·6 배열)">3·6·3·6</button>
               <button class="chip" type="button" data-v="정팔각형과 정사각형(4·8·8 배열)">4·8·8</button>
             </div></div>
+          <div class="field"><span>모양을 얼마나 자유롭게?</span>
+            <div class="chips" data-key="free" data-single>
+              <button class="chip" type="button" data-v="strict">도형 틀 그대로</button>
+              <button class="chip" type="button" aria-pressed="true" data-v="bend">변을 구불구불 (에셔처럼)</button>
+              <button class="chip" type="button" data-v="free">틀 없이 자유롭게</button>
+            </div>
+            <p class="small muted" id="tFreeDesc"></p></div>
           <div class="field"><label for="tSubject">주제 — 반복될 모양</label><input id="tSubject" value="고양이" maxlength="30"></div>
+          <label class="row small" style="font-weight:700"><input type="checkbox" id="tVary" checked style="width:auto"> 하나하나 표정 · 자세 · 소품을 조금씩 다르게</label>
           <div class="field"><span>움직임</span>
             <div class="chips" data-key="move" data-single>
               <button class="chip" type="button" aria-pressed="true" data-v="밀기(평행이동)">밀기</button>
@@ -332,6 +340,7 @@
             <li>한 꼭짓점에 모인 각의 합은 360°?</li>
             <li>어떤 움직임(밀기 · 돌리기 · 뒤집기)이 쓰였나요? 몇 도 돌렸나요?</li>
             <li>컵에 감았을 때 <b>왼쪽 끝과 오른쪽 끝</b>이 이어지나요?</li>
+            <li>모양이 자유로워도 <b>똑같이 되풀이되는 묶음</b>을 찾을 수 있나요? 그 묶음에 동그라미!</li>
           </ol>
         </div>
         <div class="box tint">

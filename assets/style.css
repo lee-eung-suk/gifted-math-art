@@ -217,7 +217,10 @@ footer{padding-block:48px;color:var(--muted);font-size:14px}
 .card-link.up{background:var(--fg);color:var(--bg)}
 .card-link.up small{color:var(--vio);filter:none}
 .card-link.up .d{color:color-mix(in srgb,var(--bg) 70%,transparent)}
-.land-foot{text-align:center;color:var(--muted);font-size:13px}
+.land-foot{text-align:center;color:var(--muted);font-size:13px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
+.teacher-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;color:var(--fg);background:var(--surface);text-decoration:none}
+.teacher-btn:hover{border-color:var(--fg)}
+#tShapeField.off{opacity:.4}
 
 body.on-home .subnav, body.on-home main.pages{display:none}
 body:not(.on-home) .landing{display:none}
