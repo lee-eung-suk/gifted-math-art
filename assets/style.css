@@ -218,8 +218,8 @@ footer{padding-block:48px;color:var(--muted);font-size:14px}
 .card-link.up small{color:var(--vio);filter:none}
 .card-link.up .d{color:color-mix(in srgb,var(--bg) 70%,transparent)}
 .land-foot{text-align:center;color:var(--muted);font-size:13px;display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap}
-.teacher-btn{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px;color:var(--fg);background:var(--surface);text-decoration:none}
-.teacher-btn:hover{border-color:var(--fg)}
+.teacher-btn{display:inline-flex;align-items:center;gap:8px;border:2px solid var(--fg);border-radius:16px;padding:12px 26px;font-family:var(--display);font-weight:400;font-size:clamp(18px,2.6vh,22px);color:var(--bg);background:var(--fg);text-decoration:none;box-shadow:0 6px 16px -8px rgba(0,0,0,.4);transition:transform .2s}
+.teacher-btn:hover{transform:translateY(-2px)}
 #tShapeField.off{opacity:.4}
 
 body.on-home .subnav, body.on-home main.pages{display:none}

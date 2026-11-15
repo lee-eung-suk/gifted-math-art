@@ -20,6 +20,14 @@
 .card pre{margin:0;white-space:pre-wrap;word-break:keep-all;overflow-wrap:anywhere;font-family:var(--body);font-size:14px;background:var(--code);border-radius:10px;padding:8px 10px}
 .card .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
 .sel{width:18px;height:18px}
+.days{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.day{border:2px solid var(--line);background:var(--surface);color:var(--fg);border-radius:14px;padding:8px 14px;text-align:left;cursor:pointer;font-weight:700;font-size:16px;line-height:1.25}
+.day small{display:block;font-size:12px;color:var(--muted);font-weight:700}
+.day[aria-selected="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.day.wk6 small{color:#4f8ff7} .day.wk0 small{color:#ff6b6b}
+.day[aria-selected="true"] small{color:inherit;opacity:.8}
+.dayhead{grid-column:1/-1;margin:14px 0 0;font-family:var(--display);font-weight:400;font-size:22px;border-bottom:2px solid var(--line);padding-bottom:4px}
+.dayhead:first-child{margin-top:0}
 dialog{border:0;border-radius:16px;padding:0;max-width:94vw;max-height:94vh;background:var(--bg)}
 dialog img{max-width:94vw;max-height:88vh}
 dialog::backdrop{background:rgba(0,0,0,.6)}
@@ -41,6 +49,7 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
       <button class="btn ghost" type="button" id="refresh">새로고침</button>
       <button class="btn" type="button" id="zipAll">전체 작품 ZIP 다운로드</button>
     </header>
+    <div class="days" id="days" role="tablist" aria-label="날짜별 보기"></div>
     <div class="bar">
       <div class="chips" id="filters"></div>
       <span style="flex:1"></span>
@@ -58,7 +67,11 @@ dialog::backdrop{background:rgba(0,0,0,.6)}
 const $ = s => document.querySelector(s);
 const ACT = { block: "② 패턴블럭 작품", style: "③ 스타일 바꾸기", tess: "④ 테셀레이션 A (직접)", tessai: "④ 테셀레이션 B (제미나이)", mug: "⑤ 컵 전사 도안", etc: "기타" };
 const ACT_COL = { block: "var(--hex-l)", style: "var(--rho-l)", tess: "var(--trap-l)", tessai: "var(--trap-l)", mug: "var(--sq-l)", etc: "var(--vio-l)" };
-let key = "", items = [], filter = "all";
+let key = "", items = [], filter = "all", day = "all";
+const WD = ["일", "월", "화", "수", "목", "금", "토"];
+const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; };
+const dayLabel = k => { const [y, m, d] = k.split("-").map(Number), w = new Date(y, m - 1, d).getDay(); return { date: `${m}월 ${d}일`, wd: `${WD[w]}요일`, w }; };
+const dayItems = () => day === "all" ? items : items.filter(x => dayKey(x.createdAt) === day);
 const blobs = new Map(); // 경로 → objectURL
 
 try { key = sessionStorage.getItem("tkey") || ""; } catch {}
@@ -70,7 +83,7 @@ async function load() {
   if (r.status === 401) { key = ""; try { sessionStorage.removeItem("tkey"); } catch {} $("#app").hidden = true; $("#login").hidden = false; $("#loginMsg").textContent = "비밀번호가 맞지 않아요."; return false; }
   const j = await r.json().catch(() => ({}));
   if (!r.ok) { $("#msg").textContent = j.error || "목록을 불러오지 못했어요."; return true; }
-  items = j.items || []; $("#msg").textContent = ""; render(); return true;
+  items = (j.items || []).sort((a, b) => b.createdAt - a.createdAt); $("#msg").textContent = ""; render(); return true;
 }
 async function imageURL(it) {
   if (blobs.has(it.imagePath)) return blobs.get(it.imagePath);
@@ -82,12 +95,27 @@ const pad = n => String(n).padStart(2, "0");
 const stamp = t => { const d = new Date(t); return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; };
 const safe = s => String(s || "").replace(/[\\/:*?"<>|\s]+/g, "_").slice(0, 30);
 const fileName = (it, i) => `${safe(ACT[it.activity] || "기타")}_${safe(it.group ? it.group + "_" + it.name : it.name)}_${new Date(it.createdAt).toISOString().slice(0, 16).replace(/[-:T]/g, "")}${i != null ? "_" + i : ""}.${it.ext || "jpg"}`;
-const visible = () => filter === "all" ? items : items.filter(x => x.activity === filter);
+const visible = () => filter === "all" ? dayItems() : dayItems().filter(x => x.activity === filter);
 
 function render() {
+  // 날짜(요일) 탭
+  const keys = [...new Set(items.map(x => dayKey(x.createdAt)))].sort().reverse();
+  if (day !== "all" && !keys.includes(day)) day = "all";
+  const dz = $("#days"); dz.textContent = "";
+  [["all"], ...keys.map(k => [k])].forEach(([k]) => {
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("role", "tab"); b.className = "day";
+    b.setAttribute("aria-selected", k === day);
+    const n = k === "all" ? items.length : items.filter(x => dayKey(x.createdAt) === k).length;
+    if (k === "all") b.innerHTML = `<small>모든 날짜</small>전체 ${n}개`;
+    else { const L = dayLabel(k); b.classList.add("wk" + L.w); b.innerHTML = `<small>${L.wd}</small>${L.date} · ${n}개`; }
+    b.onclick = () => { day = k; render(); };
+    dz.append(b);
+  });
   const f = $("#filters"); f.textContent = "";
+  const di = dayItems();
+  if (filter !== "all" && !di.some(x => x.activity === filter)) filter = "all";
   [["all", "전체"], ...Object.entries(ACT)].forEach(([id, n]) => {
-    const c = id === "all" ? items.length : items.filter(x => x.activity === id).length;
+    const c = id === "all" ? di.length : di.filter(x => x.activity === id).length;
     if (id !== "all" && !c) return;
     const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.setAttribute("aria-pressed", id === filter); b.textContent = `${n} ${c}`;
     b.onclick = () => { filter = id; render(); }; f.append(b);
@@ -97,7 +125,10 @@ function render() {
   $("#count").textContent = `${list.length}개`;
   const box = $("#cards"); box.textContent = "";
   if (!list.length) { box.innerHTML = '<div class="drop" style="grid-column:1/-1;padding:40px">아직 올라온 작품이 없어요.</div>'; return; }
+  let lastDay = "";
   list.forEach(it => {
+    const dk = dayKey(it.createdAt);
+    if (day === "all" && dk !== lastDay) { lastDay = dk; const L = dayLabel(dk); const h = document.createElement("h3"); h.className = "dayhead"; h.textContent = `${L.date} ${L.wd}`; box.append(h); }
     const card = document.createElement("article"); card.className = "card";
     const imgBox = document.createElement("div"); imgBox.className = "img";
     const img = document.createElement("img"); img.alt = `${it.name}의 작품`; imgBox.append(img);
@@ -136,7 +167,7 @@ $("#login").addEventListener("submit", async e => {
   if (await load()) { try { sessionStorage.setItem("tkey", key); } catch {} }
 });
 $("#refresh").onclick = load;
-const zipLabel = () => { $("#zipAll").textContent = filter === "all" ? "전체 작품 ZIP 다운로드" : "이 활동 작품 ZIP 다운로드"; };
+const zipLabel = () => { $("#zipAll").textContent = `${day === "all" ? "" : dayLabel(day).date + " "}${filter === "all" ? (day === "all" ? "전체 작품" : "작품") : "이 활동 작품"} ZIP 다운로드`; };
 $("#zipAll").onclick = async () => {
   const list = visible(); if (!list.length) return;
   const b = $("#zipAll"); b.disabled = true; $("#msg").textContent = "";
@@ -159,7 +190,7 @@ $("#zipAll").onclick = async () => {
     zip.file("작품목록.csv", "\ufeff활동,이름,모둠,시간,파일,작품설명,프롬프트\n" + rows.filter(Boolean).join("\n") + "\n");
     b.textContent = "ZIP 만드는 중…";
     const out = await zip.generateAsync({ type: "blob" });
-    const d = new Date(); download(URL.createObjectURL(out), `수학영재반_작품_${d.getMonth() + 1}월${d.getDate()}일.zip`);
+    const d = new Date(), L = day === "all" ? null : dayLabel(day); download(URL.createObjectURL(out), L ? `수학영재반_작품_${L.date.replace(" ", "")}_${L.wd}.zip` : `수학영재반_작품_전체_${d.getMonth() + 1}월${d.getDate()}일받음.zip`);
     if (failed.length) $("#msg").textContent = `${failed.length}개는 받지 못해 빠졌어요: ${failed.join(", ")}`;
   } catch { $("#msg").textContent = "ZIP을 만들지 못했어요."; }
   b.disabled = false; zipLabel();
