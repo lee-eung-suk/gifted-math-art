@@ -236,58 +236,23 @@
 
   <!-- ④ 테셀레이션 -->
   <section id="tess" style="--acc:var(--trap);--acc-l:var(--trap-l)">
-    <div class="sec-head"><div class="sec-no">4</div><h2>테셀레이션 무늬 만들기</h2><p>두 가지 활동을 따로 해요 — 위 버튼으로 골라요</p></div>
+    <div class="sec-head"><div class="sec-no">4</div><h2>테셀레이션 무늬 만들기</h2><p>두 가지 활동을 따로 해요 — 아래 버튼으로 골라요</p></div>
 
     <div class="tabs" role="tablist" aria-label="테셀레이션 활동 고르기">
-      <button class="tab" type="button" role="tab" id="tabA" aria-controls="tessA" aria-selected="true"><b>활동 A</b>패턴블럭으로 직접 만들기</button>
-      <button class="tab" type="button" role="tab" id="tabB" aria-controls="tessB" aria-selected="false"><b>활동 B</b>제미나이로 만들기</button>
+      <button class="tab" type="button" role="tab" id="tabB" aria-controls="tessB" aria-selected="true"><b>활동 1</b>제미나이로 만들기</button>
+      <button class="tab" type="button" role="tab" id="tabA" aria-controls="tessA" aria-selected="false"><b>활동 2</b>패턴블럭으로 직접 만들기</button>
     </div>
 
-    <div class="tabpanel" id="tessA" role="tabpanel" aria-labelledby="tabA">
-      <ol class="todo" aria-label="활동 A에서 할 일">
-        <li><b>불러오기</b>② 내 패턴블럭 작품 불러오기</li>
-        <li><b>움직이기</b>밀기 · 돌리기 · 뒤집기 골라 보기</li>
-        <li><b>검증하기</b>빈틈 · 겹침이 없나요?</li>
-        <li><b>저장 · 제출</b>💾 저장하거나 📤 제출 (여러 번 OK)</li>
-      </ol>
-    <div class="box" style="margin-top:16px">
-      <h4>한 조각을 밀고 · 돌리고 · 뒤집어 무늬 만들기</h4>
-      <div class="grid2">
-        <div class="stack">
-          <div class="drop" id="tileDrop">
-            <span>조각으로 쓸 그림 — ② 작품을 불러오거나 다른 그림 고르기</span>
-            <input type="file" id="tileFile" accept="image/*" aria-label="테셀레이션 조각 이미지">
-            <button class="btn ghost" type="button" id="tileFromBlocks">② 내 패턴블럭 작품 불러오기</button>
-          </div>
-          <div class="field"><span>움직임</span>
-            <div class="chips" id="tileModes">
-              <button class="chip" type="button" aria-pressed="true" data-m="slide">밀기</button>
-              <button class="chip" type="button" data-m="brick">벽돌 밀기</button>
-              <button class="chip" type="button" data-m="half">반 바퀴 돌리기</button>
-              <button class="chip" type="button" data-m="rot4">90° 돌리기</button>
-              <button class="chip" type="button" data-m="mirror">뒤집기</button>
-            </div></div>
-          <div class="field"><label for="tileSize">조각 크기 <span id="tileSizeV" class="muted"></span></label><input type="range" id="tileSize" min="60" max="400" value="160"></div>
-          <div class="row">
-            <button class="btn ghost" type="button" id="tilePng">💾 내 기기에 저장</button>
-            <button class="btn ghost" type="button" id="tileToMug">⑤ 컵 디자인으로 보내기</button>
-            <button class="btn acc" type="button" id="tileSend">📤 선생님께 제출</button>
-          </div>
-        </div>
-        <canvas id="tileCanvas" class="preview" width="1200" height="600" aria-label="테셀레이션 미리보기"></canvas>
-      </div>
-    </div>
-      <p class="savenote small muted">이 활동은 웹에서 직접 무늬를 만드는 거예요. 제미나이는 쓰지 않아요. <span class="sent" data-sent="tess"></span></p>
-    </div>
-
-    <div class="tabpanel" id="tessB" role="tabpanel" aria-labelledby="tabB" hidden>
-      <ol class="todo" aria-label="활동 B에서 할 일">
+    <div class="tabpanel" id="tessB" role="tabpanel" aria-labelledby="tabB">
+      <ol class="todo" aria-label="활동 1에서 할 일">
         <li><b>조립하기</b>도형 · 주제 · 움직임 고르고 프롬프트 복사</li>
         <li><b>제미나이</b>새 대화에 붙여 넣어 무늬 만들기</li>
         <li><b>검증하기</b>체크리스트로 확인, 틀리면 고쳐 달라고</li>
         <li><b>저장 · 제출</b>결과 저장 → 📤 제출 (여러 번 OK)</li>
       </ol>
       <div class="examples" style="margin-bottom:16px">
+      <figure class="wide"><img src="img/ex-tess-kitty-free.jpg" alt="태닝한 고양이와 꽃, 조개, 야자수가 도형 칸 없이 서로 맞물려 반복되는 테셀레이션" loading="lazy"><figcaption>태닝 키티 — 사물끼리 맞물리게 (도형 틀 없이)</figcaption></figure>
+      <figure class="wide"><img src="img/ex-tess-kitty-grid.jpg" alt="정팔각형과 정사각형 칸 안에 태닝한 고양이가 반복되는 테셀레이션" loading="lazy"><figcaption>같은 주제 — 4·8·8 도형 칸 그대로</figcaption></figure>
       <figure><img src="img/ex-tess-bear.jpg" alt="곰 모양이 빈틈없이 반복되는 테셀레이션" loading="lazy"><figcaption>곰 — 밀기</figcaption></figure>
       <figure><img src="img/ex-tess-cat.jpg" alt="고양이 퍼즐 모양 테셀레이션" loading="lazy"><figcaption>고양이 — 돌리기 각도 표시</figcaption></figure>
       <figure><img src="img/ex-tess-swan.jpg" alt="백조가 맞물린 에셔 풍 테셀레이션" loading="lazy"><figcaption>백조 — 에셔 풍</figcaption></figure>
@@ -297,6 +262,13 @@
       <div class="box">
         <h4>테셀레이션 프롬프트 조립기</h4>
         <div class="builder" id="tessBuilder">
+          <div class="field"><span>모양을 얼마나 자유롭게?</span>
+            <div class="chips" data-key="free" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-v="obj">사물끼리 맞물리게 (틀 없이)</button>
+              <button class="chip" type="button" data-v="bend">도형 변을 구불구불하게</button>
+              <button class="chip" type="button" data-v="strict">도형 칸 그대로</button>
+            </div>
+            <p class="small muted" id="tFreeDesc"></p></div>
           <div class="field" id="tShapeField"><span>기본 도형</span>
             <div class="chips" data-key="shape" data-single>
               <button class="chip" type="button" aria-pressed="true" data-v="정육각형">정육각형</button>
@@ -306,14 +278,8 @@
               <button class="chip" type="button" data-v="정육각형과 정삼각형(3·6·3·6 배열)">3·6·3·6</button>
               <button class="chip" type="button" data-v="정팔각형과 정사각형(4·8·8 배열)">4·8·8</button>
             </div></div>
-          <div class="field"><span>모양을 얼마나 자유롭게?</span>
-            <div class="chips" data-key="free" data-single>
-              <button class="chip" type="button" data-v="strict">도형 틀 그대로</button>
-              <button class="chip" type="button" aria-pressed="true" data-v="bend">변을 구불구불 (에셔처럼)</button>
-              <button class="chip" type="button" data-v="free">틀 없이 자유롭게</button>
-            </div>
-            <p class="small muted" id="tFreeDesc"></p></div>
-          <div class="field"><label for="tSubject">주제 — 반복될 모양</label><input id="tSubject" value="고양이" maxlength="30"></div>
+          <div class="field"><label for="tSubject">주제 — 주인공</label><input id="tSubject" value="고양이" maxlength="30"></div>
+          <div class="field" id="tWithField"><label for="tWith">함께 맞물릴 사물들</label><input id="tWith" value="꽃, 조개, 야자수, 서핑보드" maxlength="60"></div>
           <label class="row small" style="font-weight:700"><input type="checkbox" id="tVary" checked style="width:auto"> 하나하나 표정 · 자세 · 소품을 조금씩 다르게</label>
           <div class="field"><span>움직임</span>
             <div class="chips" data-key="move" data-single>
@@ -358,6 +324,85 @@
       <div class="sendbox" style="margin-top:16px">
         <div><h4>제미나이 테셀레이션 제출하기</h4><p class="small">결과 그림을 내 기기에 저장한 뒤 올려요. 지금 만든 프롬프트도 함께 보내져요. <b>여러 번 보내도 괜찮아요.</b> <span class="sent" data-sent="tessai"></span></p></div>
         <button class="btn acc" type="button" id="tessAiSend">📤 선생님께 제출</button>
+      </div>
+    </div>
+
+    <div class="tabpanel" id="tessA" role="tabpanel" aria-labelledby="tabA" hidden>
+      <ol class="todo" aria-label="활동 2에서 할 일">
+        <li><b>불러오기</b>② 내 패턴블럭 작품 불러오기</li>
+        <li><b>움직이기</b>밀기 · 돌리기 · 뒤집기 골라 보기</li>
+        <li><b>검증하기</b>빈틈 · 겹침이 없나요?</li>
+        <li><b>저장 · 제출</b>💾 저장하거나 📤 제출 (여러 번 OK)</li>
+      </ol>
+    <div class="box" style="margin-top:16px">
+      <h4>한 조각을 밀고 · 돌리고 · 뒤집어 무늬 만들기</h4>
+      <div class="grid2">
+        <div class="stack">
+          <div class="drop" id="tileDrop">
+            <span>조각으로 쓸 그림 — ② 작품을 불러오거나 다른 그림 고르기</span>
+            <input type="file" id="tileFile" accept="image/*" aria-label="테셀레이션 조각 이미지">
+            <button class="btn ghost" type="button" id="tileFromBlocks">② 내 패턴블럭 작품 불러오기</button>
+          </div>
+          <div class="field"><span>움직임</span>
+            <div class="chips" id="tileModes">
+              <button class="chip" type="button" aria-pressed="true" data-m="slide">밀기</button>
+              <button class="chip" type="button" data-m="brick">벽돌 밀기</button>
+              <button class="chip" type="button" data-m="half">반 바퀴 돌리기</button>
+              <button class="chip" type="button" data-m="rot4">90° 돌리기</button>
+              <button class="chip" type="button" data-m="mirror">뒤집기</button>
+            </div></div>
+          <div class="field"><label for="tileSize">조각 크기 <span id="tileSizeV" class="muted"></span></label><input type="range" id="tileSize" min="60" max="400" value="160"></div>
+          <div class="row">
+            <button class="btn ghost" type="button" id="tilePng">💾 내 기기에 저장</button>
+            <button class="btn ghost" type="button" id="tileToMug">⑤ 컵 디자인으로 보내기</button>
+            <button class="btn acc" type="button" id="tileSend">📤 선생님께 제출</button>
+          </div>
+        </div>
+        <canvas id="tileCanvas" class="preview" width="1200" height="600" aria-label="테셀레이션 미리보기"></canvas>
+      </div>
+    </div>
+      <p class="savenote small muted">이 활동은 웹에서 직접 무늬를 만드는 거예요. 제미나이는 쓰지 않아요. <span class="sent" data-sent="tess"></span></p>
+    </div>
+    <div class="box texttool" id="textTool">
+      <h4>✏️ 무늬에 글자 넣기 <span class="small muted">— 활동 1 · 2 어느 무늬든</span></h4>
+      <div class="grid2">
+        <div class="stack">
+          <div class="drop" id="txDrop">
+            <span>글자를 넣을 무늬 고르기 (제미나이에서 저장한 그림)</span>
+            <input type="file" id="txFile" accept="image/*" aria-label="글자를 넣을 무늬 그림">
+            <button class="btn ghost" type="button" id="txFromTile">활동 2에서 만든 무늬 가져오기</button>
+          </div>
+          <div class="field"><label for="txText">넣을 글자</label><input id="txText" maxlength="30" placeholder="예: 소천초 수학영재 2026" autocomplete="off"></div>
+          <div class="grid2" style="gap:10px">
+            <div class="field"><span>위치</span>
+              <div class="chips" id="txPos" data-single>
+                <button class="chip" type="button" data-y=".15">위</button>
+                <button class="chip" type="button" aria-pressed="true" data-y=".5">가운데</button>
+                <button class="chip" type="button" data-y=".85">아래</button>
+              </div></div>
+            <div class="field"><label for="txSize">글자 크기</label><input type="range" id="txSize" min="24" max="160" value="72"></div>
+          </div>
+          <div class="field"><span>글자 색</span>
+            <div class="chips" id="txColor" data-single>
+              <button class="chip" type="button" aria-pressed="true" data-c="#ffffff">흰색</button>
+              <button class="chip" type="button" data-c="#1f2333">검정</button>
+              <button class="chip" type="button" data-c="#ff4d6d">빨강</button>
+              <button class="chip" type="button" data-c="#2f6fe8">파랑</button>
+              <button class="chip" type="button" data-c="#ffc23d">노랑</button>
+            </div></div>
+          <label class="row small" style="font-weight:700"><input type="checkbox" id="txBand" checked style="width:auto"> 글자 뒤에 띠 깔기 (잘 보이게)</label>
+          <label class="mirror-opt"><input type="checkbox" id="txMirror"> <span><b>글자 좌우반전</b> — 전사지에 바로 인쇄할 때 켜요. 컵에 찍히면 다시 바르게 보여요.</span></label>
+          <p class="small muted">미리보기에서 글자를 끌어서 옮길 수도 있어요. ⑤ 컵 전사로 보내면 그곳의 ‘전사용 PNG’가 그림 전체를 뒤집어 주니, 그때는 글자를 뒤집지 않은 채로 보내져요.</p>
+          <div class="row">
+            <button class="btn ghost" type="button" id="txPng">💾 내 기기에 저장</button>
+            <button class="btn ghost" type="button" id="txToMug">⑤ 컵 디자인으로 보내기</button>
+            <button class="btn acc" type="button" id="txSend">📤 선생님께 제출</button>
+          </div>
+        </div>
+        <div class="stack">
+          <canvas id="txCanvas" class="preview" width="1200" height="600" aria-label="글자를 넣은 무늬 미리보기"></canvas>
+          <p class="small muted" id="txNote" style="margin-top:-8px"></p>
+        </div>
       </div>
     </div>
   </section>
@@ -445,8 +490,8 @@
           <select id="uAct">
             <option value="block">② 패턴블럭 작품</option>
             <option value="style">③ 스타일 바꾸기</option>
-            <option value="tess">④ 테셀레이션 A (직접 만들기)</option>
-            <option value="tessai">④ 테셀레이션 B (제미나이)</option>
+            <option value="tessai">④ 테셀레이션 활동 1 (제미나이)</option>
+            <option value="tess">④ 테셀레이션 활동 2 (직접 만들기)</option>
             <option value="mug">⑤ 컵 전사 도안</option>
             <option value="etc">기타</option>
           </select></label>

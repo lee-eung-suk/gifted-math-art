@@ -287,3 +287,11 @@ body:not(.on-home) .landing{display:none}
 #sdDoneMsg{margin:0;text-align:center}
 .send-dlg .thumb{max-height:180px}
 @media (max-width:820px){ .tabs{grid-template-columns:1fr} .mywork{flex-direction:column;align-items:flex-start} .inline-field{flex-wrap:wrap} }
+
+.examples figure.wide{grid-column:span 2}
+.examples figure.wide img{aspect-ratio:auto;height:auto}
+.texttool{margin-top:16px;border:2px dashed var(--acc,var(--line))}
+.mirror-opt{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--acc-l,var(--surface));font-size:14px;cursor:pointer}
+.mirror-opt input{width:20px;height:20px;flex:none;margin-top:1px}
+#txCanvas{cursor:grab;touch-action:none}
+@media (max-width:820px){ .examples figure.wide{grid-column:1/-1} }

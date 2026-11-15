@@ -409,10 +409,10 @@ const TESS_PROMPTS = [
   ["바꿔 보기", "[정삼각형]을 기본으로 한 테셀레이션 무늬를 만들어 줘.\n[물고기] 모양이 [돌리기]로 빈틈과 겹침 없이 반복되고,\n[파스텔 수채화] 스타일로."],
   ["두 가지 도형 (영재)", "정육각형과 정삼각형을 한 꼭짓점에 3·6·3·6 순서로 배열한 테셀레이션 무늬를 만들어 줘.\n정육각형 안에는 [별], 정삼각형 안에는 [달]을 그려 줘.\n[밤하늘] 색으로."],
   ["컵 전사용", "머그컵에 감을 테셀레이션 무늬를 만들어 줘.\n가로:세로 2:1, 왼쪽 끝과 오른쪽 끝이 자연스럽게 이어지게.\n[펭귄] 모양이 빈틈없이 반복되고, 가장자리까지 꽉 차게, 글자 없이."],
-  ["틀에서 벗어나기 (창의)", "육각형, 사각형에 너무 얽매여 있어.\n좀 더 창의적이고 다양한 형태의 조각들이 자유롭게 맞물려 반복되게 다시 그려 줘.\n빈틈과 겹침은 그대로 없게."],
+  ["틀에서 벗어나기 (창의)", "육각형, 사각형 칸에 너무 얽매여 있어.\n도형 칸 없이 사물과 사물이 서로의 빈 곳에 쏙 들어가 맞물리게 다시 그려 줘.\n한 사물의 윤곽선이 곧 옆 사물의 윤곽선이 되게, 빈틈과 겹침은 없게."],
   ["변을 구불구불하게 (에셔 방법)", "[정사각형]의 위쪽 변을 [구름 모양]으로 튀어나오게 하고, 아래쪽 변은 그만큼 똑같이 들어가게 바꿔 줘.\n이렇게 만든 조각이 [양] 모양이 되어 밀기로 빈틈없이 반복되는 테셀레이션을 그려 줘."],
   ["모두 조금씩 다르게", "모든 [고양이]가 똑같지 않게 표정, 자세, 소품을 조금씩 다르게 바꿔 줘.\n조각끼리 맞물리는 테두리 모양은 그대로 둬."],
-  ["여러 모양 섞기 (창의)", "[바닷속 생물]이 주인공인 테셀레이션을 만들어 줘.\n[물고기], [문어], [불가사리]처럼 서로 다른 모양의 조각들이 퍼즐처럼 빈틈과 겹침 없이 맞물리고,\n이 묶음이 [밀기]로 계속 되풀이되게."],
+  ["사물끼리 맞물리기 (창의)", "[물고기], [문어], [불가사리], [조개]로 테셀레이션 무늬를 만들어 줘.\n도형 칸이나 배경 없이, 사물과 사물이 서로의 빈 곳에 쏙 들어가 퍼즐처럼 맞물리게.\n빈틈과 겹침 없이 꽉 채우고, 이 묶음이 [밀기]로 계속 되풀이되게."],
   ["틀린 곳 고치기", "빈틈이 보이는 곳이 있어.\n모든 [고양이]가 같은 크기로, 변끼리 딱 맞물리게 다시 그려 줘."],
   ["영어 프롬프트", "A seamless tessellation pattern of [cute cats] based on a [regular hexagon] grid,\nno gaps and no overlaps, [rainbow colors], flat illustration, 2:1 wide, no text."],
 ];
@@ -489,12 +489,13 @@ function initTessBuilder() {
     const move = chosen($('#tessBuilder [data-key="move"]'))[0];
     const style = $("#tStyle").value.trim();
     const use = chosen($('#tessBuilder [data-key="use"]'))[0];
-    const free = chosen($('#tessBuilder [data-key="free"]'))[0] || "strict";
-    $("#tShapeField").classList.toggle("off", free === "free");
+    const free = chosen($('#tessBuilder [data-key="free"]'))[0] || "obj";
+    const withs = $("#tWith").value.trim();
+    $("#tShapeField").hidden = free === "obj"; $("#tWithField").hidden = free !== "obj";
     $("#tFreeDesc").textContent = {
-      strict: "정해진 도형 칸 안에 그림이 들어가요. 수학 규칙이 가장 잘 보여요.",
+      obj: "도형 칸 없이 사물과 사물이 직접 맞물려요 (에셔의 그림처럼). 같은 묶음이 어디서 되풀이되는지 찾아보는 게 수학 숙제!",
       bend: "도형의 한 변을 튀어나오게 하면 맞은편 변은 그만큼 들어가요. 조각이 그림 모양 그대로 맞물려요.",
-      free: "기본 도형은 쓰지 않아요. 여러 모양 조각이 퍼즐처럼 맞물리고, 되풀이되는 묶음을 찾아보는 게 숙제!",
+      strict: "정해진 도형 칸 안에 그림이 들어가요. 수학 규칙이 가장 잘 보여요.",
     }[free];
     const lines = [];
     if (free === "strict") {
@@ -505,10 +506,10 @@ function initTessBuilder() {
         `조각 하나하나가 ${subj} 모양 그대로 퍼즐처럼 맞물리게 해 줘.`,
         `${josa(move, "으로", "로")} 빈틈과 겹침 없이 반복되고,`);
     } else {
-      lines.push(`${josa(subj, "이", "가")} 주인공인 자유로운 테셀레이션 무늬를 만들어 줘.`,
-        "육각형, 사각형 같은 정해진 틀에 얽매이지 말고, 곡선과 여러 가지 모양의 조각들이 퍼즐처럼 맞물리게 해 줘.",
-        "조각의 모양과 크기는 다양해도 되지만, 빈틈과 겹침은 없게.",
-        `전체 무늬는 ${josa(move, "으로", "로")} 되풀이되고,`);
+      lines.push(withs ? `${josa(subj, "과", "와")} ${withs} 같은 여러 사물로 테셀레이션 무늬를 만들어 줘.` : `${josa(subj, "과", "와")} 어울리는 여러 사물로 테셀레이션 무늬를 만들어 줘.`,
+        "육각형, 사각형 같은 도형 칸이나 배경 틀은 쓰지 마.",
+        "사물과 사물이 서로의 빈 곳에 쏙 들어가 맞물리게 해서, 한 사물의 윤곽선이 곧 옆 사물의 윤곽선이 되게 해 줘.",
+        `빈틈과 겹침 없이 화면을 꽉 채우고, 같은 묶음이 ${josa(move, "으로", "로")} 되풀이되게.`);
     }
     if ($("#tVary").checked) lines.push(`${subj}마다 표정, 자세, 소품을 조금씩 다르게 해 줘.`);
     lines.push(style ? `${josa(style, "으로", "로")} 그려 줘.` : "알록달록하게 그려 줘.",
@@ -516,7 +517,7 @@ function initTessBuilder() {
     $("#tessOut").textContent = lines.join("\n");
   };
   $$("#tessBuilder .chips").forEach(c => chipGroup(c, build));
-  ["#tSubject", "#tStyle", "#tVary"].forEach(s => $(s).addEventListener("input", build));
+  ["#tSubject", "#tStyle", "#tVary", "#tWith"].forEach(s => $(s).addEventListener("input", build));
   $("#tessCopy").addEventListener("click", e => copyText($("#tessOut").textContent, e.currentTarget));
   build();
   const box = $("#tessPrompts"); TESS_PROMPTS.forEach(([l, t]) => box.append(promptCard(l, t)));
@@ -525,6 +526,86 @@ function initTessBuilder() {
   tabs.forEach(([t]) => $(t).addEventListener("click", () => tabs.forEach(([t2, p2]) => {
     const on = t2 === t; $(t2).setAttribute("aria-selected", on); $(p2).hidden = !on;
   })));
+}
+
+/* =========================================================
+   ④ 무늬에 글자 넣기 (글자만 좌우반전 선택)
+   ========================================================= */
+let txImg = null, txAct = "tessai", txY = .5, txX = .5;
+function drawText(cv, mirror) {
+  const ctx = cv.getContext("2d");
+  if (!txImg) {
+    cv.width = 1200; cv.height = 600;
+    ctx.fillStyle = cssVar("--surface") || "#f4f5fa"; ctx.fillRect(0, 0, 1200, 600);
+    ctx.fillStyle = cssVar("--muted") || "#888"; ctx.font = "36px Jua, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+    ctx.fillText("왼쪽에서 무늬 그림을 먼저 골라 주세요", 600, 300);
+    cv._box = null; return;
+  }
+  const sc = Math.min(1, 2400 / Math.max(txImg.width, txImg.height));
+  cv.width = Math.round(txImg.width * sc); cv.height = Math.round(txImg.height * sc);
+  ctx.drawImage(txImg, 0, 0, cv.width, cv.height);
+  const text = $("#txText").value.trim(); if (!text) { cv._box = null; return; }
+  const k = cv.width / 1200, size = +$("#txSize").value * k, col = $("#txColor [aria-pressed=true]").dataset.c;
+  ctx.font = `${size}px Jua, "Noto Sans KR", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  const w = ctx.measureText(text).width, x = txX * cv.width, y = txY * cv.height;
+  const dark = col === "#1f2333";
+  ctx.save(); ctx.translate(x, y); if (mirror) ctx.scale(-1, 1);
+  if ($("#txBand").checked) {
+    const pw = w + size * .9, ph = size * 1.45, r = ph / 2;
+    ctx.fillStyle = dark ? "rgba(255,255,255,.82)" : "rgba(20,22,40,.55)";
+    ctx.beginPath();
+    ctx.moveTo(-pw / 2 + r, -ph / 2); ctx.lineTo(pw / 2 - r, -ph / 2); ctx.arc(pw / 2 - r, 0, r, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(-pw / 2 + r, ph / 2); ctx.arc(-pw / 2 + r, 0, r, Math.PI / 2, Math.PI * 1.5); ctx.closePath(); ctx.fill();
+  }
+  ctx.lineJoin = "round"; ctx.lineWidth = size * .12; ctx.strokeStyle = dark ? "#ffffff" : "rgba(20,22,40,.9)";
+  ctx.strokeText(text, 0, size * .04);
+  ctx.fillStyle = col; ctx.fillText(text, 0, size * .04);
+  ctx.restore();
+  cv._box = { x, y, w: w + size, h: size * 1.6 };
+}
+function renderText() {
+  const cv = $("#txCanvas"), m = $("#txMirror").checked;
+  drawText(cv, m);
+  $("#txNote").textContent = !txImg ? "" : m ? "↑ 글자가 좌우반전 되어 있어요 (전사지에 바로 인쇄용)" : "↑ 글자가 바르게 보여요";
+}
+function textOut(mirror) { const c = document.createElement("canvas"); drawText(c, mirror); return c; }
+function initText() {
+  const setImg = (im, act) => { txImg = im; txAct = act; renderText(); };
+  wireDrop($("#txDrop"), $("#txFile"), f => fileToImage(f).then(im => setImg(im, "tessai")).catch(() => {}));
+  $("#txFromTile").addEventListener("click", () => loadImage($("#tileCanvas").toDataURL("image/png")).then(im => setImg(im, "tess")));
+  ["#txText", "#txSize", "#txBand", "#txMirror"].forEach(s => $(s).addEventListener("input", renderText));
+  $$("#txPos .chip").forEach(b => b.addEventListener("click", () => { $$("#txPos .chip").forEach(c => c.setAttribute("aria-pressed", c === b)); txY = +b.dataset.y; txX = .5; renderText(); }));
+  $$("#txColor .chip").forEach(b => b.addEventListener("click", () => { $$("#txColor .chip").forEach(c => c.setAttribute("aria-pressed", c === b)); renderText(); }));
+  // 미리보기에서 글자 끌어 옮기기
+  const cv = $("#txCanvas"); let drag = null;
+  const at = e => { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height }; };
+  cv.addEventListener("pointerdown", e => {
+    const b = cv._box; if (!b) return;
+    const p = at(e);
+    if (Math.abs(p.x * cv.width - b.x) > b.w / 2 + 20 || Math.abs(p.y * cv.height - b.y) > b.h / 2 + 20) return;
+    drag = { dx: p.x - txX, dy: p.y - txY }; cv.setPointerCapture(e.pointerId); e.preventDefault();
+  });
+  cv.addEventListener("pointermove", e => {
+    if (!drag) return; const p = at(e);
+    txX = Math.max(.05, Math.min(.95, p.x - drag.dx)); txY = Math.max(.05, Math.min(.95, p.y - drag.dy));
+    $$("#txPos .chip").forEach(c => c.setAttribute("aria-pressed", "false")); renderText();
+  });
+  const end = () => { drag = null; }; cv.addEventListener("pointerup", end); cv.addEventListener("pointercancel", end);
+  const need = btn => { if (!txImg) { flash(btn, "무늬를 먼저 골라요"); return false; } return true; };
+  $("#txPng").addEventListener("click", e => {
+    if (!need(e.currentTarget)) return; const m = $("#txMirror").checked;
+    download(textOut(m).toDataURL("image/png"), m ? "테셀레이션_글자_좌우반전_전사용.png" : "테셀레이션_글자.png");
+  });
+  $("#txToMug").addEventListener("click", e => {
+    if (!need(e.currentTarget)) return;
+    loadImage(textOut(false).toDataURL("image/png")).then(im => { mugImg = im; setFit("cover"); renderMug(); go("mug"); });
+  });
+  $("#txSend").addEventListener("click", e => {
+    if (!need(e.currentTarget)) return;
+    setUpload(textOut(false).toDataURL("image/jpeg", .9), txAct, `글자 넣은 테셀레이션: “${$("#txText").value.trim()}”\n`, "다른 그림을 보내려면 여기서 고르기");
+  });
+  if (document.fonts) document.fonts.load("40px Jua").then(renderText, () => {});
+  renderText();
 }
 
 /* ---------- 이미지 도우미 ---------- */
@@ -713,7 +794,7 @@ async function compress(src, max = 1600) {
 function setUpload(src, act, descPrefix = "", pickText) { openSend({ act, image: src, desc: descPrefix, pickText }); }
 
 /* ---------- 보낸 기록 (이 기기) ---------- */
-const ACT_NAMES = { block: "② 패턴블럭 작품", style: "③ 다른 스타일로 (제미나이 결과)", tess: "④ 테셀레이션 A · 직접 만들기", tessai: "④ 테셀레이션 B · 제미나이", mug: "⑤ 컵 디자인", etc: "기타" };
+const ACT_NAMES = { block: "② 패턴블럭 작품", style: "③ 다른 스타일로 (제미나이 결과)", tess: "④ 테셀레이션 활동 2 · 직접 만들기", tessai: "④ 테셀레이션 활동 1 · 제미나이", mug: "⑤ 컵 디자인", etc: "기타" };
 const sentLog = () => { try { return JSON.parse(localStorage.getItem("gifted-sent") || "[]"); } catch { return []; } };
 function logSent(act) { const l = sentLog(); l.push({ act, t: Date.now() }); try { localStorage.setItem("gifted-sent", JSON.stringify(l.slice(-200))); } catch {} renderSent(); }
 function renderSent() {
@@ -824,5 +905,5 @@ function route() {
 }
 window.addEventListener("hashchange", route);
 
-initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initUpload(); initSend(); route();
+initVertex(); initBlocks(); initStyle(); initTessBuilder(); initTile(); initMug(); initText(); initUpload(); initSend(); route();
 })();
